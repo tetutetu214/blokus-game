@@ -160,6 +160,7 @@ let playerPassed = [false, false, false, false];
 let gameMode = 'cpu'; // 'cpu' or 'local'
 let players = PLAYERS;
 let cpuThinking = false;
+let hoverPos = null;
 
 // ===== Canvas Setup =====
 const canvas = document.getElementById('board');
@@ -223,12 +224,13 @@ function drawBoard() {
     }
   });
 
-  // Ghost preview
-  if (ghostPos && currentShape) {
-    const valid = canPlace(currentPlayer, currentShape, ghostPos.r, ghostPos.c);
+  // Ghost preview (ghostPos from touch/click, hoverPos from mouse hover)
+  const previewPos = ghostPos || hoverPos;
+  if (previewPos && currentShape) {
+    const valid = canPlace(currentPlayer, currentShape, previewPos.r, previewPos.c);
     currentShape.forEach(([dr, dc]) => {
-      const rr = ghostPos.r + dr;
-      const cc = ghostPos.c + dc;
+      const rr = previewPos.r + dr;
+      const cc = previewPos.c + dc;
       if (rr >= 0 && rr < BOARD_SIZE && cc >= 0 && cc < BOARD_SIZE) {
         ctx.fillStyle = valid ? players[currentPlayer].light : '#ff0000';
         ctx.globalAlpha = 0.4;
@@ -542,6 +544,7 @@ function selectPiece(idx) {
     currentShape = [...playerPieces[currentPlayer][idx].shape.map(s => [...s])];
   }
   ghostPos = null;
+  hoverPos = null;
   drawBoard();
   updatePieceList();
 }
@@ -560,13 +563,13 @@ canvas.addEventListener('mousemove', (e) => {
   const pos = getBoardCell(e.clientX, e.clientY);
   const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
   const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
-  ghostPos = { r: pos.r - midR, c: pos.c - midC };
+  hoverPos = { r: pos.r - midR, c: pos.c - midC };
   drawBoard();
 });
 
 canvas.addEventListener('mouseleave', () => {
-  if (ghostPos) {
-    ghostPos = null;
+  if (hoverPos) {
+    hoverPos = null;
     drawBoard();
   }
 });

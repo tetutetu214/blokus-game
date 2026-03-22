@@ -884,6 +884,35 @@ function handleBoardTap(pos) {
   const br = pos.r - midR;
   const bc = pos.c - midC;
   const result = canPlace(currentPlayer, currentShape, br, bc);
+  // Debug: why canPlace failed
+  if (!result) {
+    const cells = currentShape.map(([dr, dc]) => [br + dr, bc + dc]);
+    let reason = '';
+    for (const [r, c] of cells) {
+      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) { reason = 'OOB(' + r + ',' + c + ')'; break; }
+      if (board[r][c] >= 0) { reason = 'occupied(' + r + ',' + c + ')=' + board[r][c]; break; }
+    }
+    if (!reason) {
+      for (const [r, c] of cells) {
+        const adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+        for (const [ar, ac] of adj) {
+          if (ar >= 0 && ar < BOARD_SIZE && ac >= 0 && ac < BOARD_SIZE && board[ar][ac] === currentPlayer) {
+            reason = 'edge(' + r + ',' + c + ')adj(' + ar + ',' + ac + ')'; break;
+          }
+        }
+        if (reason) break;
+      }
+    }
+    if (!reason) {
+      if (isFirstMove(currentPlayer)) {
+        const [sr, sc] = getStartCorner(currentPlayer);
+        reason = 'firstMove corner=(' + sr + ',' + sc + ') cells=' + JSON.stringify(cells);
+      } else {
+        reason = 'noDiag';
+      }
+    }
+    debugLog('FAIL reason=' + reason + ' player=' + currentPlayer + ' humanP=' + humanPlayer);
+  }
   debugLog('place br=' + br + ' bc=' + bc + ' mid=(' + midR + ',' + midC + ') canPlace=' + result);
 
   if (canPlace(currentPlayer, currentShape, br, bc)) {

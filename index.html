@@ -208,6 +208,7 @@ let gameMode = 'cpu'; // 'cpu' or 'local'
 let players = PLAYERS;
 let cpuThinking = false;
 let hoverPos = null;
+let lastPlacedCells = []; // [[r,c], ...] for highlight
 
 // ===== Canvas Setup =====
 const canvas = document.getElementById('board');
@@ -258,6 +259,18 @@ function drawBoard() {
     ctx.moveTo(0, i * cellSize);
     ctx.lineTo(BOARD_SIZE * cellSize, i * cellSize);
     ctx.stroke();
+  }
+
+  // Highlight last placed piece
+  if (lastPlacedCells.length > 0) {
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 6;
+    for (const [lr, lc] of lastPlacedCells) {
+      ctx.strokeRect(lc * cellSize + 2, lr * cellSize + 2, cellSize - 4, cellSize - 4);
+    }
+    ctx.shadowBlur = 0;
   }
 
   // Starting corners
@@ -388,8 +401,10 @@ function canPlace(player, shape, br, bc) {
 }
 
 function placePiece(player, shape, br, bc) {
+  lastPlacedCells = [];
   shape.forEach(([dr, dc]) => {
     board[br + dr][bc + dc] = player;
+    lastPlacedCells.push([br + dr, bc + dc]);
   });
 }
 
@@ -1008,6 +1023,7 @@ function initGame() {
   gameOver = false;
   playerPassed = [false, false, false, false];
   cpuThinking = false;
+  lastPlacedCells = [];
 
   playerPieces = [];
   for (let p = 0; p < 4; p++) {

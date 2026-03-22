@@ -40,7 +40,8 @@ canvas#board { display: block; touch-action: none; }
 #piece-controls button { background: #0f3460; border: none; color: #eee; border-radius: 6px; font-size: 16px; cursor: pointer; padding: 4px 10px; }
 #piece-controls button.icon-btn { width: 40px; height: 32px; padding: 0; }
 #piece-controls button:active { background: #e94560; }
-#piece-list { flex: 1; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 4px 10px; -webkit-overflow-scrolling: touch; }
+#piece-list { flex: 1; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; gap: 8px; padding: 4px 10px; -webkit-overflow-scrolling: touch; }
+@media (min-width: 600px) { #piece-list { justify-content: center; flex-wrap: wrap; overflow-y: auto; } }
 .piece-item { flex-shrink: 0; cursor: pointer; border: 2px solid transparent; border-radius: 6px; padding: 4px; }
 .piece-item.selected { border-color: #fff; background: rgba(255,255,255,0.1); }
 .piece-item.used { opacity: 0.2; pointer-events: none; }

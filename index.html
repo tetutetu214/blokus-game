@@ -1347,6 +1347,7 @@ function quitToTitle() {
   }
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';
+  hideOrderSelect();
   const save = loadGame();
   const continueBtn = document.getElementById('continue-btn');
   if (continueBtn) continueBtn.style.display = save ? 'inline-block' : 'none';
@@ -1357,6 +1358,7 @@ function backToTitle() {
   deleteSave();
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';
+  hideOrderSelect();
 }
 
 window.addEventListener('resize', () => {

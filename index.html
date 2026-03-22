@@ -58,6 +58,7 @@ canvas#board { display: block; touch-action: none; }
 #deselect-btn { background: #e94560; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; display: none; }
 #undo-btn { background: #555; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; }
 #undo-btn:disabled { opacity: 0.3; cursor: default; }
+#quit-btn { background: #555; border: none; color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; width: auto; height: auto; margin-left: 8px; }
 
 /* Start screen */
 #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
@@ -147,6 +148,7 @@ canvas#board { display: block; touch-action: none; }
       <button id="deselect-btn" onclick="deselectPiece()">×</button>
       <button id="undo-btn" onclick="undoMove()" disabled>戻す</button>
       <button id="pass-btn" onclick="passTurn()">パス</button>
+      <button id="quit-btn" onclick="quitToTitle()">🏠</button>
     </div>
     <div id="viewing-label">← <span></span>のピースを表示中（タップで戻る）</div>
     <div id="piece-list"></div>
@@ -1333,6 +1335,17 @@ function showRules() {
 
 function hideRules() {
   document.getElementById('rules-overlay').classList.remove('show');
+}
+
+function quitToTitle() {
+  if (!gameOver) {
+    saveGame();
+  }
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'flex';
+  const save = loadGame();
+  const continueBtn = document.getElementById('continue-btn');
+  if (continueBtn) continueBtn.style.display = save ? 'inline-block' : 'none';
 }
 
 function backToTitle() {

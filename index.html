@@ -37,7 +37,8 @@ canvas#board { display: block; touch-action: none; }
 /* Piece panel */
 #piece-panel { height: 180px; min-height: 180px; background: #16213e; border-top: 2px solid #333; display: flex; flex-direction: column; }
 #piece-controls { display: flex; justify-content: center; gap: 12px; padding: 6px 0; }
-#piece-controls button { background: #0f3460; border: none; color: #eee; width: 40px; height: 32px; border-radius: 6px; font-size: 16px; cursor: pointer; }
+#piece-controls button { background: #0f3460; border: none; color: #eee; border-radius: 6px; font-size: 16px; cursor: pointer; padding: 4px 10px; }
+#piece-controls button.icon-btn { width: 40px; height: 32px; padding: 0; }
 #piece-controls button:active { background: #e94560; }
 #piece-list { flex: 1; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; gap: 8px; padding: 0 10px; -webkit-overflow-scrolling: touch; }
 .piece-item { flex-shrink: 0; cursor: pointer; border: 2px solid transparent; border-radius: 6px; padding: 4px; }
@@ -54,11 +55,11 @@ canvas#board { display: block; touch-action: none; }
 #modal button { background: #e94560; border: none; color: #fff; padding: 10px 28px; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 8px; }
 
 /* Pass button */
-#pass-btn { background: #e94560; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; }
-#deselect-btn { background: #e94560; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; display: none; }
-#undo-btn { background: #555; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; }
+#pass-btn { background: #e94560; color: #fff; font-size: 13px; }
+#deselect-btn { background: #e94560; color: #fff; font-size: 13px; display: none; }
+#undo-btn { background: #555; color: #fff; font-size: 13px; }
 #undo-btn:disabled { opacity: 0.3; cursor: default; }
-#quit-btn { background: #555; border: none; color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; width: auto; height: auto; margin-left: 8px; }
+#quit-btn { background: #555; color: #fff; font-size: 14px; }
 
 /* Start screen */
 #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
@@ -143,8 +144,8 @@ canvas#board { display: block; touch-action: none; }
   </div>
   <div id="piece-panel">
     <div id="piece-controls">
-      <button onclick="rotatePiece()">↻</button>
-      <button onclick="flipPiece()">↔</button>
+      <button class="icon-btn" onclick="rotatePiece()">↻</button>
+      <button class="icon-btn" onclick="flipPiece()">↔</button>
       <button id="deselect-btn" onclick="deselectPiece()">×</button>
       <button id="undo-btn" onclick="undoMove()" disabled>戻す</button>
       <button id="pass-btn" onclick="passTurn()">パス</button>

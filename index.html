@@ -713,6 +713,7 @@ function updatePieceList() {
 }
 
 function deselectPiece() {
+  debugLog('deselectPiece called from: ' + new Error().stack.split('\n')[1]);
   selectedPieceIdx = null;
   currentShape = null;
   ghostPos = null;
@@ -723,6 +724,7 @@ function deselectPiece() {
 }
 
 function selectPiece(idx) {
+  debugLog('selectPiece idx=' + idx + ' prev=' + selectedPieceIdx);
   if (cpuThinking) return;
   if (isCpuPlayer(currentPlayer)) return;
   if (selectedPieceIdx === idx) {
@@ -771,8 +773,13 @@ canvas.addEventListener('click', (e) => {
   handleBoardTap(pos);
 });
 
+document.addEventListener('touchstart', (e) => {
+  debugLog('doc touch: ' + e.target.tagName + '#' + (e.target.id || '') + '.' + (e.target.className || ''));
+}, { passive: true });
+
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
+  debugLog('touchstart fired');
   if (gameOver || cpuThinking) return;
   if (isCpuPlayer(currentPlayer)) return;
   const touch = e.touches[0];

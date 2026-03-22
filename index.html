@@ -55,6 +55,8 @@ canvas#board { display: block; touch-action: none; }
 
 /* Pass button */
 #pass-btn { background: #e94560; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; }
+#undo-btn { background: #555; border: none; color: #fff; padding: 4px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; height: auto; }
+#undo-btn:disabled { opacity: 0.3; cursor: default; }
 
 /* Start screen */
 #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
@@ -131,6 +133,7 @@ canvas#board { display: block; touch-action: none; }
     <div id="piece-controls">
       <button onclick="rotatePiece()">↻</button>
       <button onclick="flipPiece()">↔</button>
+      <button id="undo-btn" onclick="undoMove()" disabled>戻す</button>
       <button id="pass-btn" onclick="passTurn()">パス</button>
     </div>
     <div id="viewing-label">← <span></span>のピースを表示中（タップで戻る）</div>
@@ -250,6 +253,7 @@ let cpuThinking = false;
 let humanPlayer = 0; // Which player index is human
 let viewingPlayer = null; // Which player's pieces are being viewed (null = own)
 let placeableCornersCache = null; // Cache for placeable corner positions
+let undoState = null; // Snapshot before last human move
 let hoverPos = null;
 let lastPlacedCells = []; // [[r,c], ...] for highlight
 
@@ -459,6 +463,7 @@ function canPlace(player, shape, br, bc) {
 
 function placePiece(player, shape, br, bc) {
   lastPlacedCells = [];
+  undoState = null;
   shape.forEach(([dr, dc]) => {
     board[br + dr][bc + dc] = player;
     lastPlacedCells.push([br + dr, bc + dc]);
@@ -752,6 +757,8 @@ canvas.addEventListener('touchend', (e) => {
   if (ghostPos && currentShape && !cpuThinking && !isCpuPlayer(currentPlayer) && selectedPieceIdx !== null) {
     // ghostPos is already centered, so place directly without re-centering
     if (canPlace(currentPlayer, currentShape, ghostPos.r, ghostPos.c)) {
+      // Save undo snapshot before placing
+      saveUndoState(selectedPieceIdx);
       placePiece(currentPlayer, currentShape, ghostPos.r, ghostPos.c);
       playerPieces[currentPlayer][selectedPieceIdx].used = true;
       selectedPieceIdx = null;
@@ -766,6 +773,46 @@ canvas.addEventListener('touchend', (e) => {
   }
 }, { passive: false });
 
+function saveUndoState(pieceIdx) {
+  undoState = {
+    board: board.map(row => [...row]),
+    currentPlayer: currentPlayer,
+    pieceIdx: pieceIdx,
+    pieceUsed: playerPieces.map(pp => pp.map(p => p.used)),
+    passCount: passCount,
+    playerPassed: [...playerPassed],
+    lastPlacedCells: [...lastPlacedCells]
+  };
+  document.getElementById('undo-btn').disabled = false;
+}
+
+function undoMove() {
+  if (!undoState || gameOver || cpuThinking) return;
+
+  // Restore state
+  board = undoState.board;
+  currentPlayer = undoState.currentPlayer;
+  passCount = undoState.passCount;
+  playerPassed = undoState.playerPassed;
+  lastPlacedCells = undoState.lastPlacedCells;
+  for (let p = 0; p < 4; p++) {
+    for (let idx = 0; idx < playerPieces[p].length; idx++) {
+      playerPieces[p][idx].used = undoState.pieceUsed[p][idx];
+    }
+  }
+
+  selectedPieceIdx = null;
+  currentShape = null;
+  ghostPos = null;
+  undoState = null;
+  document.getElementById('undo-btn').disabled = true;
+
+  updateTurnIndicator();
+  updatePieceList();
+  drawBoard();
+  saveGame();
+}
+
 function handleBoardTap(pos) {
   if (!currentShape || selectedPieceIdx === null) {
     ghostPos = null;
@@ -779,6 +826,8 @@ function handleBoardTap(pos) {
   const bc = pos.c - midC;
 
   if (canPlace(currentPlayer, currentShape, br, bc)) {
+    // Save undo snapshot before placing
+    saveUndoState(selectedPieceIdx);
     placePiece(currentPlayer, currentShape, br, bc);
     playerPieces[currentPlayer][selectedPieceIdx].used = true;
     selectedPieceIdx = null;

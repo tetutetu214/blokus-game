@@ -68,6 +68,15 @@ canvas#board { display: block; touch-action: none; }
 .start-btn .sub { font-size: 12px; color: #aaa; display: block; margin-top: 4px; }
 #main-menu { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .feedback-link { font-size: 12px; color: #888; text-decoration: none; margin-top: 8px; }
+#rules-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
+#rules-overlay.show { display: flex; }
+#rules-modal { background: #16213e; border-radius: 16px; padding: 20px; max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#rules-modal h2 { text-align: center; font-size: 20px; margin-bottom: 12px; }
+#rules-modal h3 { font-size: 15px; color: #e94560; margin: 14px 0 6px; }
+#rules-modal p, #rules-modal li { font-size: 13px; line-height: 1.6; color: #ccc; }
+#rules-modal ul { padding-left: 18px; margin: 4px 0; }
+#rules-modal .rules-close { display: block; margin: 16px auto 0; background: #e94560; border: none; color: #fff; padding: 10px 28px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+.rules-link { font-size: 14px; color: #6bb5e9; cursor: pointer; margin-top: 4px; background: none; border: none; text-decoration: underline; }
 .feedback-link:hover, .feedback-link:active { color: #e94560; text-decoration: underline; }
 #order-select { display: none; flex-direction: column; align-items: center; gap: 12px; }
 #order-select h2 { font-size: 18px; margin-bottom: 4px; }
@@ -112,6 +121,7 @@ canvas#board { display: block; touch-action: none; }
     <button class="order-btn" onclick="startCpuGame(3)">4番手<span class="corner-label">左下コーナー</span></button>
     <button class="order-btn" style="background:#555;margin-top:8px;" onclick="hideOrderSelect()">戻る</button>
   </div>
+  <button class="rules-link" onclick="showRules()">遊び方を見る</button>
   <a class="feedback-link" href="https://github.com/tetutetu214/blokus-game/issues" target="_blank">バグ報告・要望はこちら</a>
 </div>
 
@@ -1317,6 +1327,14 @@ function initGame() {
   }
 }
 
+function showRules() {
+  document.getElementById('rules-overlay').classList.add('show');
+}
+
+function hideRules() {
+  document.getElementById('rules-overlay').classList.remove('show');
+}
+
 function backToTitle() {
   closeModal();
   deleteSave();
@@ -1333,5 +1351,29 @@ window.addEventListener('orientationchange', () => {
   }, 100);
 });
 </script>
+<div id="rules-overlay" onclick="hideRules()">
+  <div id="rules-modal" onclick="event.stopPropagation()">
+    <h2>遊び方</h2>
+    <h3>目的</h3>
+    <p>自分のピースをできるだけ1つでも多くボードに置くこと！<br>残ったピースのマス数が少ないほど高得点です。</p>
+    <h3>配置ルール</h3>
+    <ul>
+      <li>最初のピースは自分の<b>コーナー</b>に置く</li>
+      <li>2手目以降は、自分のピースと<b>角だけ</b>で接するように置く</li>
+      <li>自分のピース同士が<b>辺で接してはいけない</b></li>
+      <li>他のプレイヤーのピースとは辺で接してもOK</li>
+    </ul>
+    <h3>操作方法</h3>
+    <ul>
+      <li>下のパネルからピースを選択</li>
+      <li><b>↻</b> 回転 / <b>↔</b> 反転 で向きを変える</li>
+      <li>ボードをタップして配置</li>
+      <li><b>● ドット</b>が置ける場所の目印です</li>
+    </ul>
+    <h3>スコア</h3>
+    <p>残ったピースのマス数 × -1点<br>全ピースを置けたら +15点ボーナス！</p>
+    <button class="rules-close" onclick="hideRules()">閉じる</button>
+  </div>
+</div>
 </body>
 </html>

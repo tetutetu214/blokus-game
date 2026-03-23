@@ -351,10 +351,34 @@ function drawBoard() {
   const corners = [[0,0],[0,BOARD_SIZE-1],[BOARD_SIZE-1,BOARD_SIZE-1],[BOARD_SIZE-1,0]];
   corners.forEach((pos, i) => {
     if (board[pos[0]][pos[1]] < 0) {
-      ctx.fillStyle = players[i].color;
-      ctx.globalAlpha = 0.3;
-      ctx.fillRect(pos[1] * cellSize, pos[0] * cellSize, cellSize, cellSize);
-      ctx.globalAlpha = 1;
+      const cx = pos[1] * cellSize;
+      const cy = pos[0] * cellSize;
+      // Highlight current player's start corner prominently on first move
+      if (isFirstMove(currentPlayer) && i === currentPlayer && !gameOver) {
+        // Pulsing glow effect for current player's corner
+        ctx.fillStyle = players[i].color;
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(cx, cy, cellSize, cellSize);
+        ctx.globalAlpha = 1;
+        // Draw star marker
+        ctx.fillStyle = players[i].light;
+        ctx.font = Math.max(12, cellSize - 4) + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u2605', cx + cellSize / 2, cy + cellSize / 2);
+        // Bright border
+        ctx.strokeStyle = players[i].light;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = players[i].light;
+        ctx.shadowBlur = 8;
+        ctx.strokeRect(cx + 1, cy + 1, cellSize - 2, cellSize - 2);
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = players[i].color;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(cx, cy, cellSize, cellSize);
+        ctx.globalAlpha = 1;
+      }
     }
   });
 

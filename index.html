@@ -209,14 +209,14 @@ const PLAYERS = [
   { id: 0, name: 'あなた', color: '#0072B2', light: '#4da6d9' },
   { id: 1, name: 'CPU1', color: '#F0E442', light: '#f5ed7a' },
   { id: 2, name: 'CPU2', color: '#9467BD', light: '#b394d4' },
-  { id: 3, name: 'CPU3', color: '#E69F00', light: '#f0bf4d' }
+  { id: 3, name: 'CPU3', color: '#D55E00', light: '#e8885a' }
 ];
 
 const PLAYERS_LOCAL = [
   { id: 0, name: 'P1', color: '#0072B2', light: '#4da6d9' },
   { id: 1, name: 'P2', color: '#F0E442', light: '#f5ed7a' },
   { id: 2, name: 'P3', color: '#9467BD', light: '#b394d4' },
-  { id: 3, name: 'P4', color: '#E69F00', light: '#f0bf4d' }
+  { id: 3, name: 'P4', color: '#D55E00', light: '#e8885a' }
 ];
 
 // CPU Character System (10 characters, Rank 1-10)
@@ -1246,7 +1246,7 @@ function resumeGame() {
       { color: '#0072B2', light: '#4da6d9' },
       { color: '#F0E442', light: '#f5ed7a' },
       { color: '#9467BD', light: '#b394d4' },
-      { color: '#E69F00', light: '#f0bf4d' }
+      { color: '#D55E00', light: '#e8885a' }
     ];
     let cpuIdx = 0;
     players = [];
@@ -1358,7 +1358,7 @@ function charSelectBack() {
 function renderCharSelect() {
   const label = document.getElementById('char-slot-label');
   const slotNum = charSelectSlot + 1;
-  const colors = ['#f5ed7a', '#b394d4', '#f0bf4d'];
+  const colors = ['#f5ed7a', '#b394d4', '#e8885a'];
   // Adjust slot display based on human position
   let displayPositions = [];
   for (let i = 0; i < 4; i++) {
@@ -1430,7 +1430,7 @@ function startGame(mode) {
       { color: '#0072B2', light: '#4da6d9' },
       { color: '#F0E442', light: '#f5ed7a' },
       { color: '#9467BD', light: '#b394d4' },
-      { color: '#E69F00', light: '#f0bf4d' }
+      { color: '#D55E00', light: '#e8885a' }
     ];
     let cpuIdx = 0;
     players = [];
@@ -1580,7 +1580,7 @@ function showStats() {
     ctx.stroke();
     // Draw points and labels
     points.forEach((p) => {
-      ctx.fillStyle = p.rank === 1 ? '#F0E442' : p.rank === 2 ? '#4da6d9' : p.rank === 3 ? '#b394d4' : '#E69F00';
+      ctx.fillStyle = p.rank === 1 ? '#F0E442' : p.rank === 2 ? '#4da6d9' : p.rank === 3 ? '#b394d4' : '#D55E00';
       ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(p.score + '\u70b9', p.x, p.y - 9);

@@ -6,20 +6,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>KADO</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #1a1a2e; color: #eee; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Orbitron', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a1a; color: #eee; }
 
 #app { display: flex; flex-direction: column; height: 100%; width: 100%; }
 
 /* Header */
-#header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #16213e; }
-#header h1 { font-size: 18px; letter-spacing: 2px; }
+#header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #0d1528; border-bottom: 1px solid rgba(233,69,96,0.3); }
+#header h1 { font-size: 18px; letter-spacing: 4px; color: #e94560; text-shadow: 0 0 10px rgba(233,69,96,0.5), 0 0 20px rgba(233,69,96,0.3); }
 #turn-indicator { font-size: 14px; font-weight: bold; padding: 4px 12px; border-radius: 12px; }
-#score-btn { background: none; border: 1px solid #555; color: #eee; padding: 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+#score-btn { background: none; border: 1px solid rgba(233,69,96,0.3); color: #e94560; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
 
 /* Stats bar */
-#stats-bar { display: flex; justify-content: space-around; padding: 4px 8px; background: #0f1a2e; border-bottom: 1px solid #333; }
+#stats-bar { display: flex; justify-content: space-around; padding: 4px 8px; background: #0a1020; border-bottom: 1px solid rgba(233,69,96,0.2); }
 .stat-item { text-align: center; font-size: 11px; line-height: 1.3; }
 .stat-item .stat-name { opacity: 0.7; }
 .stat-item .stat-value { font-weight: bold; font-size: 13px; }
@@ -35,25 +36,25 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-sy
 canvas#board { display: block; touch-action: none; }
 
 /* Piece panel */
-#piece-panel { height: 180px; min-height: 180px; background: #16213e; border-top: 2px solid #333; display: flex; flex-direction: column; }
+#piece-panel { height: 180px; min-height: 180px; background: #0d1528; border-top: 1px solid rgba(233,69,96,0.3); display: flex; flex-direction: column; }
 #piece-controls { display: flex; justify-content: center; gap: 12px; padding: 6px 0; }
-#piece-controls button { background: #0f3460; border: none; color: #eee; border-radius: 6px; font-size: 16px; cursor: pointer; padding: 4px 10px; }
+#piece-controls button { background: transparent; border: 1px solid rgba(233,69,96,0.3); color: #eee; border-radius: 4px; font-size: 16px; cursor: pointer; padding: 4px 10px; }
 #piece-controls button.icon-btn { width: 40px; height: 32px; padding: 0; }
 #piece-controls button:active { background: #e94560; }
 #piece-list { flex: 1; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; gap: 8px; padding: 4px 10px; -webkit-overflow-scrolling: touch; }
 @media (min-width: 600px) { #piece-list { justify-content: center; flex-wrap: wrap; overflow-y: auto; } }
 .piece-item { flex-shrink: 0; cursor: pointer; border: 2px solid transparent; border-radius: 6px; padding: 4px; }
-.piece-item.selected { border-color: #fff; background: rgba(255,255,255,0.1); }
+.piece-item.selected { border-color: #e94560; background: rgba(233,69,96,0.1); box-shadow: 0 0 8px rgba(233,69,96,0.3); }
 .piece-item.used { opacity: 0.2; pointer-events: none; }
 
 /* Modal */
 #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center; }
 #modal-overlay.show { display: flex; }
-#modal { background: #16213e; border-radius: 16px; padding: 24px; text-align: center; max-width: 340px; width: 90%; }
+#modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 24px; text-align: center; max-width: 340px; width: 90%; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
 #modal h2 { margin-bottom: 16px; font-size: 20px; }
 #modal .scores { margin-bottom: 16px; }
 #modal .score-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 16px; }
-#modal button { background: #e94560; border: none; color: #fff; padding: 10px 28px; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 8px; }
+#modal button { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; }
 
 /* Pass button */
 #pass-btn { background: #e94560; color: #fff; font-size: 13px; }
@@ -64,29 +65,29 @@ canvas#board { display: block; touch-action: none; }
 
 /* Start screen */
 #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
-#start-screen h1 { font-size: 32px; letter-spacing: 4px; margin-bottom: 10px; }
-#start-screen p { font-size: 14px; color: #aaa; margin-bottom: 10px; }
-.start-btn { background: #0f3460; border: none; color: #eee; padding: 16px 40px; border-radius: 12px; font-size: 18px; cursor: pointer; width: 260px; text-align: center; touch-action: manipulation; }
-.start-btn:active { background: #e94560; }
-.start-btn .sub { font-size: 12px; color: #aaa; display: block; margin-top: 4px; }
+#start-screen h1 { font-size: 42px; letter-spacing: 8px; margin-bottom: 10px; font-weight: 900; color: #e94560; text-shadow: 0 0 10px rgba(233,69,96,0.6), 0 0 30px rgba(233,69,96,0.4), 0 0 60px rgba(233,69,96,0.2); }
+#start-screen p { font-size: 11px; color: #667; margin-bottom: 10px; letter-spacing: 3px; text-transform: uppercase; }
+.start-btn { background: transparent; border: 1px solid rgba(233,69,96,0.4); color: #eee; padding: 16px 40px; border-radius: 4px; font-size: 16px; cursor: pointer; width: 260px; text-align: center; touch-action: manipulation; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; box-shadow: 0 0 8px rgba(233,69,96,0.15), inset 0 0 8px rgba(233,69,96,0.05); }
+.start-btn:active { background: rgba(233,69,96,0.3); border-color: #e94560; box-shadow: 0 0 15px rgba(233,69,96,0.4); }
+.start-btn .sub { font-size: 9px; color: #556; display: block; margin-top: 4px; letter-spacing: 1px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
 #main-menu { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .feedback-link { font-size: 12px; color: #888; text-decoration: none; margin-top: 8px; }
 #rules-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
 #rules-overlay.show { display: flex; }
-#rules-modal { background: #16213e; border-radius: 16px; padding: 20px; max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#rules-modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 20px; max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
 #rules-modal h2 { text-align: center; font-size: 20px; margin-bottom: 12px; }
 #rules-modal h3 { font-size: 15px; color: #e94560; margin: 14px 0 6px; }
 #rules-modal p, #rules-modal li { font-size: 13px; line-height: 1.6; color: #ccc; }
 #rules-modal ul { padding-left: 18px; margin: 4px 0; }
-#rules-modal .rules-close { display: block; margin: 16px auto 0; background: #e94560; border: none; color: #fff; padding: 10px 28px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+#rules-modal .rules-close { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
 #stats-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
 #stats-overlay.show { display: flex; }
-#stats-modal { background: #16213e; border-radius: 16px; padding: 20px; max-width: 340px; width: 90%; text-align: center; }
+#stats-modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 20px; max-width: 340px; width: 90%; text-align: center; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
 #stats-modal h2 { font-size: 20px; margin-bottom: 16px; }
 #stats-modal .stat-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 15px; color: #ccc; }
 #stats-modal .stat-row .label { color: #aaa; }
 #stats-modal .stat-row .value { color: #fff; font-weight: bold; }
-#stats-modal .stats-close { display: block; margin: 16px auto 0; background: #e94560; border: none; color: #fff; padding: 10px 28px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+#stats-modal .stats-close { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
 #stats-modal .stats-reset { display: block; margin: 8px auto 0; background: none; border: none; color: #888; font-size: 12px; cursor: pointer; text-decoration: underline; }
 .feedback-link:hover, .feedback-link:active { color: #e94560; text-decoration: underline; }
 #order-select, #difficulty-select, #char-select { display: none; flex-direction: column; align-items: center; gap: 12px; }
@@ -95,20 +96,20 @@ canvas#board { display: block; touch-action: none; }
 #char-select .char-slot-label { font-size: 14px; font-weight: bold; margin-top: 4px; }
 #char-select .char-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 95vw; max-width: 450px; }
 #char-select .char-card .char-name { font-size: 11px; white-space: nowrap; }
-#char-select .char-card { background: #0f3460; border: 2px solid transparent; border-radius: 10px; padding: 8px 6px; text-align: center; cursor: pointer; touch-action: manipulation; transition: border-color 0.2s; }
+#char-select .char-card { background: rgba(15,52,96,0.4); border: 1px solid rgba(233,69,96,0.2); border-radius: 4px; padding: 8px 6px; text-align: center; cursor: pointer; touch-action: manipulation; transition: all 0.2s; }
 #char-select .char-card:active { background: #1a4a80; }
-#char-select .char-card.selected { border-color: #e94560; background: #1a3a6a; }
+#char-select .char-card.selected { border-color: #e94560; background: rgba(233,69,96,0.15); box-shadow: 0 0 10px rgba(233,69,96,0.3); }
 #char-select .char-card .char-emoji { font-size: 28px; display: block; }
 #char-select .char-card .char-info { display: flex; flex-direction: column; align-items: center; }
 #char-select .char-card .char-name { font-size: 13px; color: #eee; font-weight: bold; }
 #char-select .char-card .char-rank { font-size: 11px; color: #e94560; font-weight: bold; }
 #char-select .char-card .char-caption { font-size: 9px; color: #aaa; margin-top: 2px; }
-.order-btn { background: #0f3460; border: none; color: #eee; padding: 12px 24px; border-radius: 10px; font-size: 16px; cursor: pointer; width: 220px; text-align: center; touch-action: manipulation; }
-.order-btn:active { background: #e94560; }
+.order-btn { background: transparent; border: 1px solid rgba(233,69,96,0.3); color: #eee; padding: 12px 24px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 220px; text-align: center; touch-action: manipulation; letter-spacing: 1px; }
+.order-btn:active { background: rgba(233,69,96,0.3); border-color: #e94560; }
 .order-btn .corner-label { font-size: 11px; color: #aaa; display: block; margin-top: 2px; }
 
 /* CPU thinking indicator */
-#cpu-thinking { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 50; }
+#cpu-thinking { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); color: #e94560; padding: 12px 24px; border-radius: 4px; font-size: 14px; z-index: 50; border: 1px solid rgba(233,69,96,0.3); letter-spacing: 2px; }
 #auto-pass-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; z-index: 60; text-align: center; animation: fadeInOut 2s ease-in-out; pointer-events: none; }
 #auto-pass-toast .pass-name { font-weight: bold; font-size: 17px; }
 @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
@@ -119,49 +120,49 @@ canvas#board { display: block; touch-action: none; }
 <!-- Start Screen -->
 <div id="start-screen">
   <h1>KADO</h1>
-  <p>角でつなぐボードゲーム</p>
+  <p>CONNECT BY CORNERS</p>
   <div id="main-menu">
     <button id="continue-btn" class="start-btn" style="display:none; background:#0072B2;" onclick="resumeGame()">
       つづきから
-      <span class="sub">前回の続きを再開</span>
+      <span class="sub">Resume saved game</span>
     </button>
     <button class="start-btn" onclick="showOrderSelect()">
       1人 vs CPU
-      <span class="sub">コンピュータと対戦</span>
+      <span class="sub">Play against AI</span>
     </button>
     <button class="start-btn" onclick="startGame('local')">
-      4人対戦
-      <span class="sub">ローカルマルチプレイ</span>
+      LOCAL 4P
+      <span class="sub">Pass & Play</span>
     </button>
     <button class="start-btn" onclick="showRules()">
       遊び方
-      <span class="sub">ルールを確認する</span>
+      <span class="sub">Learn the rules</span>
     </button>
     <button class="start-btn" onclick="showStats()">
       戦績
-      <span class="sub">対戦履歴を見る</span>
+      <span class="sub">View match history</span>
     </button>
   </div>
   <div id="order-select">
-    <h2>何番手でプレイ？</h2>
-    <p>コーナーがスタート位置です</p>
-    <button class="order-btn" onclick="selectOrder(0)">1番手<span class="corner-label">左上コーナー</span></button>
-    <button class="order-btn" onclick="selectOrder(1)">2番手<span class="corner-label">右上コーナー</span></button>
-    <button class="order-btn" onclick="selectOrder(2)">3番手<span class="corner-label">右下コーナー</span></button>
-    <button class="order-btn" onclick="selectOrder(3)">4番手<span class="corner-label">左下コーナー</span></button>
-    <button class="order-btn" style="background:#555;margin-top:8px;" onclick="hideOrderSelect()">戻る</button>
+    <h2>SELECT YOUR POSITION</h2>
+    <p>Each corner is a start position</p>
+    <button class="order-btn" onclick="selectOrder(0)">1st<span class="corner-label">Top-Left Corner</span></button>
+    <button class="order-btn" onclick="selectOrder(1)">2nd<span class="corner-label">Top-Right Corner</span></button>
+    <button class="order-btn" onclick="selectOrder(2)">3rd<span class="corner-label">Bottom-Right Corner</span></button>
+    <button class="order-btn" onclick="selectOrder(3)">4th<span class="corner-label">Bottom-Left Corner</span></button>
+    <button class="order-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);margin-top:8px;" onclick="hideOrderSelect()">BACK</button>
   </div>
   <div id="char-select">
-    <h2>対戦相手を選ぼう</h2>
-    <p>3体のCPUを選んでください（同じキャラもOK）</p>
+    <h2>CHOOSE YOUR OPPONENTS</h2>
+    <p>Pick 3 CPU opponents (duplicates OK)</p>
     <div class="char-slot-label" id="char-slot-label"></div>
     <div class="char-grid" id="char-grid"></div>
     <div style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
-      <button class="order-btn" style="background:#555;width:auto;padding:10px 20px;" onclick="charSelectBack()">戻る</button>
-      <button class="order-btn" id="char-start-btn" style="background:#e94560;width:auto;padding:10px 20px;display:none;" onclick="confirmCharSelect()">この3体で開始！</button>
+      <button class="order-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);width:auto;padding:10px 20px;" onclick="charSelectBack()">BACK</button>
+      <button class="order-btn" id="char-start-btn" style="background:transparent;border:1px solid #e94560;color:#e94560;width:auto;padding:10px 20px;display:none;" onclick="confirmCharSelect()">START!</button>
     </div>
   </div>
-  <a class="feedback-link" href="https://github.com/tetutetu214/blokus-game/issues" target="_blank">バグ報告・要望はこちら</a>
+  <a class="feedback-link" href="https://github.com/tetutetu214/blokus-game/issues" target="_blank">Bug Reports & Feedback</a>
 </div>
 
 <!-- Game Screen -->
@@ -169,14 +170,14 @@ canvas#board { display: block; touch-action: none; }
   <div id="header">
     <h1>KADO</h1>
     <span id="turn-indicator">● P1</span>
-    <button id="score-btn" onclick="showScores()">スコア</button>
+    <button id="score-btn" onclick="showScores()">SCORE</button>
   </div>
   <div id="stats-bar"></div>
   <div id="board-container">
     <div id="board-wrapper">
       <canvas id="board"></canvas>
       <div id="cpu-thinking">CPU思考中...</div>
-      <div id="auto-pass-toast"><span class="pass-name"></span><br>置けるピースがありません</div>
+      <div id="auto-pass-toast"><span class="pass-name"></span><br>No valid moves - AUTO PASS</div>
     </div>
   </div>
   <div id="piece-panel">
@@ -188,14 +189,14 @@ canvas#board { display: block; touch-action: none; }
       <button id="pass-btn" onclick="passTurn()">パス</button>
       <button id="quit-btn" onclick="quitToTitle()">🏠</button>
     </div>
-    <div id="viewing-label">← <span></span>のピースを表示中（タップで戻る）</div>
+    <div id="viewing-label">← Viewing <span></span> pieces (tap to return)</div>
     <div id="piece-list"></div>
   </div>
 </div>
 
 <div id="modal-overlay" onclick="closeModal()">
   <div id="modal" onclick="event.stopPropagation()">
-    <h2 id="modal-title">スコア</h2>
+    <h2 id="modal-title">SCORE</h2>
     <div id="modal-body"></div>
     <button onclick="closeModal()">閉じる</button>
     <button id="restart-btn" style="display:none;margin-left:8px;" onclick="backToTitle()">タイトルへ</button>
@@ -206,7 +207,7 @@ canvas#board { display: block; touch-action: none; }
 // ===== Constants =====
 const BOARD_SIZE = 20;
 const PLAYERS = [
-  { id: 0, name: 'あなた', color: '#0072B2', light: '#4da6d9' },
+  { id: 0, name: 'YOU', color: '#0072B2', light: '#4da6d9' },
   { id: 1, name: 'CPU1', color: '#F0E442', light: '#f5ed7a' },
   { id: 2, name: 'CPU2', color: '#9467BD', light: '#b394d4' },
   { id: 3, name: 'CPU3', color: '#D55E00', light: '#e8885a' }
@@ -1147,7 +1148,7 @@ function showScores() {
   players.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'score-row';
-    row.innerHTML = `<span style="color:${p.color}">● ${p.name}</span><span>${getScore(i)}点</span>`;
+    row.innerHTML = `<span style="color:${p.color}">● ${p.name}</span><span>${getScore(i)}pts</span>`;
     div.appendChild(row);
   });
   body.appendChild(div);
@@ -1184,7 +1185,7 @@ function endGame() {
   players.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'score-row';
-    row.innerHTML = `<span style="color:${p.color}">● ${p.name}</span><span>${getScore(i)}点</span>`;
+    row.innerHTML = `<span style="color:${p.color}">● ${p.name}</span><span>${getScore(i)}pts</span>`;
     div.appendChild(row);
   });
   body.appendChild(div);
@@ -1252,7 +1253,7 @@ function resumeGame() {
     players = [];
     for (let i = 0; i < 4; i++) {
       if (i === humanPlayer) {
-        players.push({ id: i, name: 'あなた', ...colors[i] });
+        players.push({ id: i, name: 'YOU', ...colors[i] });
       } else {
         const ch = cpuCharacters[cpuIdx];
         const cpuName = ch ? ch.emoji + ch.name : 'CPU' + (cpuIdx + 1);
@@ -1305,7 +1306,7 @@ function updateContinueButton() {
   if (save && !save.gameOver) {
     const date = new Date(save.timestamp);
     const timeStr = date.toLocaleString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : '4人対戦';
+    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : 'Local 4P';
     btn.querySelector('.sub').textContent = modeStr + ' - ' + timeStr;
     btn.style.display = '';
   } else {
@@ -1366,7 +1367,7 @@ function renderCharSelect() {
     displayPositions.push(i + 1);
   }
   const ordinal = displayPositions[charSelectSlot];
-  label.textContent = slotNum + '体目（' + ordinal + '番手）を選択';
+  label.textContent = 'Pick #' + slotNum + ' (' + ordinal + ')';
   label.style.color = colors[charSelectSlot];
 
   const grid = document.getElementById('char-grid');
@@ -1391,7 +1392,7 @@ function pickCharacter(charIdx) {
 
   if (charSelectSlot >= 3) {
     document.getElementById('char-start-btn').style.display = '';
-    document.getElementById('char-slot-label').textContent = '選択完了！';
+    document.getElementById('char-slot-label').textContent = 'ALL SET!';
     // Show selected summary
     const grid = document.getElementById('char-grid');
     grid.innerHTML = '';
@@ -1436,7 +1437,7 @@ function startGame(mode) {
     players = [];
     for (let i = 0; i < 4; i++) {
       if (i === humanPlayer) {
-        players.push({ id: i, name: 'あなた', ...colors[i] });
+        players.push({ id: i, name: 'YOU', ...colors[i] });
       } else {
         const ch = cpuCharacters[cpuIdx];
         const cpuName = ch ? ch.emoji + ch.name : 'CPU' + (cpuIdx + 1);
@@ -1528,15 +1529,15 @@ function showStats() {
   const body = document.getElementById('stats-body');
   body.innerHTML = '';
   const rows = [
-    ['対戦数', stats.games + '回'],
+    ['Games', stats.games],
     ['勝利数', stats.wins + '回'],
     ['勝率', stats.games > 0 ? Math.round(stats.wins / stats.games * 100) + '%' : '-'],
-    ['1位', stats.ranks[0] + '回'],
-    ['2位', stats.ranks[1] + '回'],
-    ['3位', stats.ranks[2] + '回'],
-    ['4位', stats.ranks[3] + '回'],
-    ['最高スコア', stats.bestScore !== null ? stats.bestScore + '点' : '-'],
-    ['平均スコア', stats.games > 0 ? Math.round(stats.totalScore / stats.games) + '点' : '-'],
+    ['1st Place', stats.ranks[0]],
+    ['2nd Place', stats.ranks[1]],
+    ['3rd Place', stats.ranks[2]],
+    ['4th Place', stats.ranks[3]],
+    ['Best Score', stats.bestScore !== null ? stats.bestScore + 'pts' : '-'],
+    ['Avg Score', stats.games > 0 ? Math.round(stats.totalScore / stats.games) + 'pts' : '-'],
   ];
   rows.forEach(([label, value]) => {
     const row = document.createElement('div');
@@ -1644,35 +1645,35 @@ window.addEventListener('orientationchange', () => {
 </script>
 <div id="stats-overlay" onclick="hideStats()">
   <div id="stats-modal" onclick="event.stopPropagation()">
-    <h2>戦績</h2>
+    <h2>RECORDS</h2>
     <div id="stats-body"></div>
-    <button class="stats-close" onclick="hideStats()">閉じる</button>
-    <button class="stats-reset" onclick="resetStats()">戦績をリセット</button>
+    <button class="stats-close" onclick="hideStats()">CLOSE</button>
+    <button class="stats-reset" onclick="resetStats()">RESET RECORDS</button>
   </div>
 </div>
 
 <div id="rules-overlay" onclick="hideRules()">
   <div id="rules-modal" onclick="event.stopPropagation()">
-    <h2>遊び方</h2>
-    <h3>目的</h3>
-    <p>自分のピースをできるだけ1つでも多くボードに置くこと！<br>残ったピースのマス数が少ないほど高得点です。</p>
-    <h3>配置ルール</h3>
+    <h2>HOW TO PLAY</h2>
+    <h3>OBJECTIVE</h3>
+    <p>Place as many pieces as possible on the board!<br>Fewer remaining squares = higher score.</p>
+    <h3>PLACEMENT RULES</h3>
     <ul>
-      <li>最初のピースは自分の<b>コーナー</b>に置く</li>
-      <li>2手目以降は、自分のピースと<b>角だけ</b>で接するように置く</li>
-      <li>自分のピース同士が<b>辺で接してはいけない</b></li>
-      <li>他のプレイヤーのピースとは辺で接してもOK</li>
+      <li>First piece must touch your <b>corner</b></li>
+      <li>Next pieces must connect <b>corner-to-corner</b> with your own</li>
+      <li>Your pieces must <b>never share an edge</b></li>
+      <li>Touching other players' edges is OK</li>
     </ul>
-    <h3>操作方法</h3>
+    <h3>CONTROLS</h3>
     <ul>
-      <li>下のパネルからピースを選択</li>
-      <li><b>↻</b> 回転 / <b>↔</b> 反転 で向きを変える</li>
-      <li>ボードをタップして配置</li>
-      <li><b>● ドット</b>が置ける場所の目印です</li>
+      <li>Select a piece from the panel below</li>
+      <li><b>\u21bb</b> Rotate / <b>\u2194</b> Flip to change orientation</li>
+      <li>Tap the board to place</li>
+      <li><b>\u25cf Dots</b> show valid positions</li>
     </ul>
-    <h3>スコア</h3>
-    <p>残ったピースのマス数 × -1点<br>全ピースを置けたら +15点ボーナス！</p>
-    <button class="rules-close" onclick="hideRules()">閉じる</button>
+    <h3>SCORING</h3>
+    <p>Remaining squares \u00d7 -1 point<br>All pieces placed = +15 bonus!</p>
+    <button class="rules-close" onclick="hideRules()">CLOSE</button>
   </div>
 </div>
 </body>

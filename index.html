@@ -121,7 +121,7 @@ canvas#board { display: block; touch-action: none; }
   <h1>KADO</h1>
   <p>角でつなぐボードゲーム</p>
   <div id="main-menu">
-    <button id="continue-btn" class="start-btn" style="display:none; background:#2a9d8f;" onclick="resumeGame()">
+    <button id="continue-btn" class="start-btn" style="display:none; background:#0072B2;" onclick="resumeGame()">
       つづきから
       <span class="sub">前回の続きを再開</span>
     </button>
@@ -206,17 +206,17 @@ canvas#board { display: block; touch-action: none; }
 // ===== Constants =====
 const BOARD_SIZE = 20;
 const PLAYERS = [
-  { id: 0, name: 'あなた', color: '#e63946', light: '#ff6b6b' },
-  { id: 1, name: 'CPU1', color: '#457b9d', light: '#6bb5e9' },
-  { id: 2, name: 'CPU2', color: '#2a9d8f', light: '#5dd9cb' },
-  { id: 3, name: 'CPU3', color: '#e9c46a', light: '#fff3a0' }
+  { id: 0, name: 'あなた', color: '#0072B2', light: '#4da6d9' },
+  { id: 1, name: 'CPU1', color: '#F0E442', light: '#f5ed7a' },
+  { id: 2, name: 'CPU2', color: '#9467BD', light: '#b394d4' },
+  { id: 3, name: 'CPU3', color: '#E69F00', light: '#f0bf4d' }
 ];
 
 const PLAYERS_LOCAL = [
-  { id: 0, name: 'P1', color: '#e63946', light: '#ff6b6b' },
-  { id: 1, name: 'P2', color: '#457b9d', light: '#6bb5e9' },
-  { id: 2, name: 'P3', color: '#2a9d8f', light: '#5dd9cb' },
-  { id: 3, name: 'P4', color: '#e9c46a', light: '#fff3a0' }
+  { id: 0, name: 'P1', color: '#0072B2', light: '#4da6d9' },
+  { id: 1, name: 'P2', color: '#F0E442', light: '#f5ed7a' },
+  { id: 2, name: 'P3', color: '#9467BD', light: '#b394d4' },
+  { id: 3, name: 'P4', color: '#E69F00', light: '#f0bf4d' }
 ];
 
 // CPU Character System (10 characters, Rank 1-10)
@@ -1243,10 +1243,10 @@ function resumeGame() {
   // Rebuild players array
   if (gameMode === 'cpu') {
     const colors = [
-      { color: '#e63946', light: '#ff6b6b' },
-      { color: '#457b9d', light: '#6bb5e9' },
-      { color: '#2a9d8f', light: '#5dd9cb' },
-      { color: '#e9c46a', light: '#fff3a0' }
+      { color: '#0072B2', light: '#4da6d9' },
+      { color: '#F0E442', light: '#f5ed7a' },
+      { color: '#9467BD', light: '#b394d4' },
+      { color: '#E69F00', light: '#f0bf4d' }
     ];
     let cpuIdx = 0;
     players = [];
@@ -1358,7 +1358,7 @@ function charSelectBack() {
 function renderCharSelect() {
   const label = document.getElementById('char-slot-label');
   const slotNum = charSelectSlot + 1;
-  const colors = ['#6bb5e9', '#5dd9cb', '#fff3a0'];
+  const colors = ['#f5ed7a', '#b394d4', '#f0bf4d'];
   // Adjust slot display based on human position
   let displayPositions = [];
   for (let i = 0; i < 4; i++) {
@@ -1427,10 +1427,10 @@ function startGame(mode) {
   // Build players array with human name at correct position
   if (mode === 'cpu') {
     const colors = [
-      { color: '#e63946', light: '#ff6b6b' },
-      { color: '#457b9d', light: '#6bb5e9' },
-      { color: '#2a9d8f', light: '#5dd9cb' },
-      { color: '#e9c46a', light: '#fff3a0' }
+      { color: '#0072B2', light: '#4da6d9' },
+      { color: '#F0E442', light: '#f5ed7a' },
+      { color: '#9467BD', light: '#b394d4' },
+      { color: '#E69F00', light: '#f0bf4d' }
     ];
     let cpuIdx = 0;
     players = [];
@@ -1574,13 +1574,13 @@ function showStats() {
       return { x, y, rank: entry.rank, score: entry.score };
     });
     // Draw line
-    ctx.strokeStyle = '#6bb5e9'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#4da6d9'; ctx.lineWidth = 2;
     ctx.beginPath();
     points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
     ctx.stroke();
     // Draw points and labels
     points.forEach((p) => {
-      ctx.fillStyle = p.rank === 1 ? '#e9c46a' : p.rank === 2 ? '#6bb5e9' : p.rank === 3 ? '#e94560' : '#e94560';
+      ctx.fillStyle = p.rank === 1 ? '#F0E442' : p.rank === 2 ? '#4da6d9' : p.rank === 3 ? '#b394d4' : '#E69F00';
       ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(p.score + '\u70b9', p.x, p.y - 9);

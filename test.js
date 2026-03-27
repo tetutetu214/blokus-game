@@ -318,6 +318,67 @@ section('14x14 配置テスト');
   assert('14x14 ボード外[14,0]はNG', !canPlace14(b14, 0, [[0,0]], 14, 0));
 }
 
+// ===== 24x24 ボードサイズテスト =====
+const HEXOMINOES = [
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[4,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[2,1]],
+  [[0,0],[1,0],[2,0],[2,1],[3,1],[4,1]],
+  [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[1,1]],
+  [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],
+];
+const PIECES_24 = [];
+for (let i = 0; i < 28; i++) PIECES_24.push(i);
+const ALL_SHAPES_24 = PIECE_SHAPES.concat(HEXOMINOES);
+
+section('24x24 ピースセットの検証');
+{
+  const pieces24 = PIECES_24.map(i => ALL_SHAPES_24[i]);
+  assert('24x24ピース数は28個', pieces24.length === 28);
+  const totalSquares = pieces24.reduce((sum, s) => sum + s.length, 0);
+  assert('24x24 合計マス数は131', totalSquares === 131);
+  const coverage = (totalSquares * 4) / (24 * 24);
+  assert('24x24 カバー率は約91%', coverage > 0.89 && coverage < 0.93);
+  assert('24x24 ヘキソミノ7種含む', pieces24.filter(s => s.length === 6).length === 7);
+  assert('24x24 全ヘキソミノは6マス', HEXOMINOES.every(h => h.length === 6));
+}
+
+section('24x24 配置テスト');
+{
+  const BS24 = 24;
+  function makeBoard24() { return Array.from({ length: BS24 }, () => Array(BS24).fill(-1)); }
+  function canPlace24(board, player, shape, br, bc) {
+    const cells = shape.map(([dr, dc]) => [br + dr, bc + dc]);
+    for (const [r, c] of cells) {
+      if (r < 0 || r >= BS24 || c < 0 || c >= BS24) return false;
+      if (board[r][c] >= 0) return false;
+    }
+    for (const [r, c] of cells) {
+      const adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+      for (const [ar, ac] of adj) {
+        if (ar >= 0 && ar < BS24 && ac >= 0 && ac < BS24 && board[ar][ac] === player) return false;
+      }
+    }
+    const isFirst = !board.some(row => row.some(v => v === player));
+    if (isFirst) {
+      const m = BS24 - 1;
+      const corners = [[0,0],[0,m],[m,m],[m,0]];
+      const [sr, sc] = corners[player];
+      return cells.some(([r, c]) => r === sr && c === sc);
+    }
+    return cells.some(([r, c]) => {
+      const diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
+      return diag.some(([dr, dc]) => dr >= 0 && dr < BS24 && dc >= 0 && dc < BS24 && board[dr][dc] === player);
+    });
+  }
+  const b24 = makeBoard24();
+  assert('24x24 P0コーナー[0,0]に配置OK', canPlace24(b24, 0, [[0,0]], 0, 0));
+  assert('24x24 P2コーナー[23,23]に配置OK', canPlace24(b24, 2, [[0,0]], 23, 23));
+  assert('24x24 ボード外[0,24]はNG', !canPlace24(b24, 0, [[0,0]], 0, 24));
+  assert('24x24 I6ヘキソミノ配置OK', canPlace24(b24, 0, HEXOMINOES[0], 0, 0));
+}
+
 // ===== 結果 =====
 console.log(`\n${'='.repeat(40)}`);
 if (fail === 0) {

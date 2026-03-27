@@ -1,13 +1,67 @@
 // game-logic.js - Pure game logic (no DOM dependencies)
-// This module can be tested independently and reused for iOS app
-//
-// All functions receive game state via the `state` parameter or module-level state reference.
-// Call setGameState(s) from the host to bind the shared state object.
+// Single Source of Truth: all game state lives here.
+// UI reads state via exported `state` object, modifies through exported functions.
 
-let state = null;
+export const state = {
+  BOARD_SIZE: 20,
+  board: [],
+  currentPlayer: 0,
+  playerPieces: [],
+  passCount: 0,
+  gameOver: false,
+  playerPassed: [false, false, false, false],
+  lastPlacedCells: [[], [], [], []],
+  humanPlayer: 0,
+  gameMode: 'cpu',
+};
 
+export function initState(boardSize, gameMode, humanPlayer) {
+  state.BOARD_SIZE = boardSize;
+  state.board = Array.from({ length: boardSize }, () => Array(boardSize).fill(-1));
+  state.currentPlayer = 0;
+  state.passCount = 0;
+  state.gameOver = false;
+  state.playerPassed = [false, false, false, false];
+  state.lastPlacedCells = [[], [], [], []];
+  state.humanPlayer = humanPlayer;
+  state.gameMode = gameMode;
+
+  const activeIdx = (boardSize === 14) ? PIECES_14 : (boardSize === 24) ? PIECES_24 : null;
+  state.playerPieces = [];
+  for (let p = 0; p < 4; p++) {
+    if (activeIdx) {
+      state.playerPieces.push(activeIdx.map(i => ({ shape: PIECE_SHAPES[i].map(s => [...s]), used: false })));
+    } else {
+      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map(shape => ({ shape: shape.map(s => [...s]), used: false })));
+    }
+  }
+}
+
+export function restoreState(saveData) {
+  state.BOARD_SIZE = saveData.boardSize || 20;
+  state.board = saveData.board;
+  state.currentPlayer = saveData.currentPlayer;
+  state.passCount = saveData.passCount;
+  state.gameOver = saveData.gameOver;
+  state.playerPassed = saveData.playerPassed;
+  state.lastPlacedCells = saveData.lastPlacedCells || [[], [], [], []];
+  state.humanPlayer = saveData.humanPlayer !== undefined ? saveData.humanPlayer : 0;
+  state.gameMode = saveData.gameMode;
+
+  const activeIdx = (state.BOARD_SIZE === 14) ? PIECES_14 : (state.BOARD_SIZE === 24) ? PIECES_24 : null;
+  state.playerPieces = [];
+  for (let p = 0; p < 4; p++) {
+    if (activeIdx) {
+      state.playerPieces.push(activeIdx.map((si, idx) => ({ shape: PIECE_SHAPES[si].map(s => [...s]), used: saveData.pieceUsed[p][idx] })));
+    } else {
+      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map((shape, idx) => ({ shape: shape.map(s => [...s]), used: saveData.pieceUsed[p][idx] })));
+    }
+  }
+}
+
+// Legacy compatibility (for setGameState during transition)
 export function setGameState(s) {
-  state = s;
+  Object.assign(state, s);
 }
 
 // ===== Constants =====

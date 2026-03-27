@@ -246,7 +246,8 @@ canvas#board { display: block; touch-action: none; }
 
 <script type="module">
 import {
-  PIECE_SHAPES, PIECES_14, PIECES_24, setGameState,
+  state, initState, restoreState,
+  PIECE_SHAPES, PIECES_14, PIECES_24,
   rotateCW, flipH, normalize, getAllOrientations,
   isFirstMove, getStartCorner, canPlace, placePiece,
   getCornerPositions, countNewCorners, countBlockedOpponentCorners, getCenterDistance,
@@ -254,11 +255,8 @@ import {
 } from './js/game-logic.js';
 
 // ===== Constants =====
-let BOARD_SIZE = 20;
+// state.BOARD_SIZE is now in state (game-logic.js)
 
-// Piece indices for 14x14 mode (n=1-4 all 9 + 3 pentominoes = 12 pieces, ~44 squares)
-// n=1-4: indices 0-8 (mono, domino, 2 trominos, 5 tetrominos)
-// Selected pentominoes: I-pento(idx 9), L-pento(idx 10), T-pento(idx 11) for variety
 const PLAYERS = [
   { id: 0, name: 'YOU', color: '#0072B2', light: '#4da6d9' },
   { id: 1, name: 'CPU1', color: '#F0E442', light: '#f5ed7a' },
@@ -343,10 +341,10 @@ function getCpuParams(ch) {
 }
 
 function getCpuCharacter(player) {
-  if (player === humanPlayer) return null;
+  if (player === state.humanPlayer) return null;
   let cpuIdx = 0;
   for (let i = 0; i < 4; i++) {
-    if (i === humanPlayer) continue;
+    if (i === state.humanPlayer) continue;
     if (i === player) return cpuCharacters[cpuIdx] || null;
     cpuIdx++;
   }
@@ -356,35 +354,18 @@ function getCpuCharacter(player) {
 // 24x24 uses all 21 standard + 7 hexominoes = 28 pieces, ~131 squares/player
 
 // ===== Game State =====
-let board = [];
-let currentPlayer = 0;
-let playerPieces = [];
+// Core game state is in game-logic.js `state` object (Single Source of Truth)
+// Below are UI-only variables
 let selectedPieceIdx = null;
 let currentShape = null;
 let ghostPos = null;
-let passCount = 0;
-let gameOver = false;
-let playerPassed = [false, false, false, false];
-let gameMode = 'cpu'; // 'cpu' or 'local'
 let players = PLAYERS;
 let cpuThinking = false;
-let humanPlayer = 0; // Which player index is human
-let viewingPlayer = null; // Which player's pieces are being viewed (null = own)
-let placeableCornersCache = null; // Cache for placeable corner positions
-let undoState = null; // Snapshot before last human move
+let viewingPlayer = null;
+let placeableCornersCache = null;
+let undoState = null;
 let hoverPos = null;
-let lastPlacedCells = [[], [], [], []]; // Per-player last placed cells for highlight
 
-
-// Sync state with game-logic module
-function syncGameState() {
-  setGameState({
-    BOARD_SIZE: BOARD_SIZE,
-    board: board,
-    playerPieces: playerPieces,
-    lastPlacedCells: lastPlacedCells,
-  });
-}
 // ===== Canvas Setup =====
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -393,8 +374,8 @@ let cellSize = 0;
 function resizeBoard() {
   const container = document.getElementById('board-container');
   const available = Math.min(container.clientWidth, container.clientHeight) - 8;
-  cellSize = Math.floor(available / BOARD_SIZE);
-  const size = cellSize * BOARD_SIZE;
+  cellSize = Math.floor(available / state.BOARD_SIZE);
+  const size = cellSize * state.BOARD_SIZE;
   canvas.width = size;
   canvas.height = size;
   canvas.style.width = size + 'px';
@@ -406,14 +387,14 @@ function resizeBoard() {
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let r = 0; r < BOARD_SIZE; r++) {
-    for (let c = 0; c < BOARD_SIZE; c++) {
+  for (let r = 0; r < state.BOARD_SIZE; r++) {
+    for (let c = 0; c < state.BOARD_SIZE; c++) {
       const x = c * cellSize;
       const y = r * cellSize;
-      if (board[r][c] >= 0) {
-        ctx.fillStyle = players[board[r][c]].color;
+      if (state.board[r][c] >= 0) {
+        ctx.fillStyle = players[state.board[r][c]].color;
         ctx.fillRect(x, y, cellSize, cellSize);
-        ctx.strokeStyle = players[board[r][c]].light;
+        ctx.strokeStyle = players[state.board[r][c]].light;
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
       } else {
@@ -425,25 +406,25 @@ function drawBoard() {
 
   ctx.strokeStyle = '#333355';
   ctx.lineWidth = 0.5;
-  for (let i = 0; i <= BOARD_SIZE; i++) {
+  for (let i = 0; i <= state.BOARD_SIZE; i++) {
     ctx.beginPath();
     ctx.moveTo(i * cellSize, 0);
-    ctx.lineTo(i * cellSize, BOARD_SIZE * cellSize);
+    ctx.lineTo(i * cellSize, state.BOARD_SIZE * cellSize);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(0, i * cellSize);
-    ctx.lineTo(BOARD_SIZE * cellSize, i * cellSize);
+    ctx.lineTo(state.BOARD_SIZE * cellSize, i * cellSize);
     ctx.stroke();
   }
 
   // Highlight last placed piece for each player
   for (let pi = 0; pi < 4; pi++) {
-    if (lastPlacedCells[pi].length > 0) {
+    if (state.lastPlacedCells[pi].length > 0) {
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;
       ctx.shadowColor = '#ffffff';
       ctx.shadowBlur = 6;
-      for (const [lr, lc] of lastPlacedCells[pi]) {
+      for (const [lr, lc] of state.lastPlacedCells[pi]) {
         ctx.strokeRect(lc * cellSize + 2, lr * cellSize + 2, cellSize - 4, cellSize - 4);
       }
       ctx.shadowBlur = 0;
@@ -451,13 +432,13 @@ function drawBoard() {
   }
 
   // Starting corners
-  const corners = [[0,0],[0,BOARD_SIZE-1],[BOARD_SIZE-1,BOARD_SIZE-1],[BOARD_SIZE-1,0]];
+  const corners = [[0,0],[0,state.BOARD_SIZE-1],[state.BOARD_SIZE-1,state.BOARD_SIZE-1],[state.BOARD_SIZE-1,0]];
   corners.forEach((pos, i) => {
-    if (board[pos[0]][pos[1]] < 0) {
+    if (state.board[pos[0]][pos[1]] < 0) {
       const cx = pos[1] * cellSize;
       const cy = pos[0] * cellSize;
       // Highlight current player's start corner prominently on first move
-      if (isFirstMove(currentPlayer) && i === currentPlayer && !gameOver) {
+      if (isFirstMove(state.currentPlayer) && i === state.currentPlayer && !state.gameOver) {
         // Pulsing glow effect for current player's corner
         ctx.fillStyle = players[i].color;
         ctx.globalAlpha = 0.5;
@@ -486,11 +467,11 @@ function drawBoard() {
   });
 
   // Highlight corners where current player can actually place a piece (cached)
-  if (!gameOver && !cpuThinking && !isCpuPlayer(currentPlayer) && placeableCornersCache) {
+  if (!state.gameOver && !cpuThinking && !isCpuPlayer(state.currentPlayer) && placeableCornersCache) {
     for (const [cr, cc] of placeableCornersCache) {
       const dotX = cc * cellSize + cellSize / 2;
       const dotY = cr * cellSize + cellSize / 2;
-      ctx.fillStyle = players[currentPlayer].light;
+      ctx.fillStyle = players[state.currentPlayer].light;
       ctx.globalAlpha = 0.5;
       ctx.beginPath();
       ctx.arc(dotX, dotY, cellSize * 0.15, 0, Math.PI * 2);
@@ -502,12 +483,12 @@ function drawBoard() {
   // Ghost preview (ghostPos from touch/click, hoverPos from mouse hover)
   const previewPos = ghostPos || hoverPos;
   if (previewPos && currentShape) {
-    const valid = canPlace(currentPlayer, currentShape, previewPos.r, previewPos.c);
+    const valid = canPlace(state.currentPlayer, currentShape, previewPos.r, previewPos.c);
     currentShape.forEach(([dr, dc]) => {
       const rr = previewPos.r + dr;
       const cc = previewPos.c + dc;
-      if (rr >= 0 && rr < BOARD_SIZE && cc >= 0 && cc < BOARD_SIZE) {
-        ctx.fillStyle = valid ? players[currentPlayer].light : '#ff0000';
+      if (rr >= 0 && rr < state.BOARD_SIZE && cc >= 0 && cc < state.BOARD_SIZE) {
+        ctx.fillStyle = valid ? players[state.currentPlayer].light : '#ff0000';
         ctx.globalAlpha = 0.4;
         ctx.fillRect(cc * cellSize, rr * cellSize, cellSize, cellSize);
         ctx.globalAlpha = 1;
@@ -536,31 +517,31 @@ function flipPiece() {
 }
 
 function executeCpuTurn() {
-  if (gameOver || !isCpuPlayer(currentPlayer)) return;
+  if (state.gameOver || !isCpuPlayer(state.currentPlayer)) return;
 
   cpuThinking = true;
   document.getElementById('cpu-thinking').style.display = 'block';
 
   // Use setTimeout to allow UI to update
   setTimeout(() => {
-    const ch = getCpuCharacter(currentPlayer);
+    const ch = getCpuCharacter(state.currentPlayer);
     const params = getCpuParams(ch);
-    const move = cpuMoveLogic(currentPlayer, params);
+    const move = cpuMoveLogic(state.currentPlayer, params);
     if (move) {
-      placePiece(currentPlayer, move.shape, move.br, move.bc);
-      playerPieces[currentPlayer][move.idx].used = true;
-      passCount = 0;
-      syncGameState();
+      placePiece(state.currentPlayer, move.shape, move.br, move.bc);
+      state.playerPieces[state.currentPlayer][move.idx].used = true;
+      state.passCount = 0;
+
     } else {
-      playerPassed[currentPlayer] = true;
-      passCount++;
+      state.playerPassed[state.currentPlayer] = true;
+      state.passCount++;
     }
 
     cpuThinking = false;
     document.getElementById('cpu-thinking').style.display = 'none';
     saveGame();
 
-    if (passCount >= 4 || checkAllPassed()) {
+    if (state.passCount >= 4 || checkAllPassed()) {
       endGame();
       return;
     }
@@ -570,18 +551,18 @@ function executeCpuTurn() {
 }
 
 function isCpuPlayer(p) {
-  return gameMode === 'cpu' && p !== humanPlayer;
+  return state.gameMode === 'cpu' && p !== state.humanPlayer;
 }
 
 function checkAllPassed() {
-  return playerPassed.every(p => p);
+  return state.playerPassed.every(p => p);
 }
 
 // ===== Piece Selection UI =====
 function updatePieceList() {
   const list = document.getElementById('piece-list');
   list.innerHTML = '';
-  const pieces = playerPieces[currentPlayer];
+  const pieces = state.playerPieces[state.currentPlayer];
   const sortedIndices = pieces.map((_, i) => i).sort((a, b) => pieces[b].shape.length - pieces[a].shape.length);
   sortedIndices.forEach((idx) => {
     const p = pieces[idx];
@@ -597,7 +578,7 @@ function updatePieceList() {
     cvs.height = maxR * cs + 2;
     const cx = cvs.getContext('2d');
     shape.forEach(([r, c]) => {
-      cx.fillStyle = players[currentPlayer].color;
+      cx.fillStyle = players[state.currentPlayer].color;
       cx.fillRect(c * cs + 1, r * cs + 1, cs - 1, cs - 1);
     });
     div.appendChild(cvs);
@@ -621,13 +602,13 @@ function deselectPiece() {
 
 function selectPiece(idx) {
   if (cpuThinking) return;
-  if (isCpuPlayer(currentPlayer)) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
   if (selectedPieceIdx === idx) {
     selectedPieceIdx = null;
     currentShape = null;
   } else {
     selectedPieceIdx = idx;
-    currentShape = [...playerPieces[currentPlayer][idx].shape.map(s => [...s])];
+    currentShape = [...state.playerPieces[state.currentPlayer][idx].shape.map(s => [...s])];
   }
   ghostPos = null;
   hoverPos = null;
@@ -645,8 +626,8 @@ function getBoardCell(x, y) {
 }
 
 canvas.addEventListener('mousemove', (e) => {
-  if (!currentShape || cpuThinking || gameOver) return;
-  if (isCpuPlayer(currentPlayer)) return;
+  if (!currentShape || cpuThinking || state.gameOver) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
   const pos = getBoardCell(e.clientX, e.clientY);
   const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
   const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
@@ -662,16 +643,16 @@ canvas.addEventListener('mouseleave', () => {
 });
 
 canvas.addEventListener('click', (e) => {
-  if (gameOver || cpuThinking) return;
-  if (isCpuPlayer(currentPlayer)) return;
+  if (state.gameOver || cpuThinking) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
   const pos = getBoardCell(e.clientX, e.clientY);
   handleBoardTap(pos);
 });
 
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
-  if (gameOver || cpuThinking) return;
-  if (isCpuPlayer(currentPlayer)) return;
+  if (state.gameOver || cpuThinking) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
   const touch = e.touches[0];
   const pos = getBoardCell(touch.clientX, touch.clientY);
   handleBoardTap(pos);
@@ -680,7 +661,7 @@ canvas.addEventListener('touchstart', (e) => {
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
   if (!currentShape || cpuThinking) return;
-  if (isCpuPlayer(currentPlayer)) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
   const touch = e.touches[0];
   const pos = getBoardCell(touch.clientX, touch.clientY);
   const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
@@ -691,18 +672,18 @@ canvas.addEventListener('touchmove', (e) => {
 
 canvas.addEventListener('touchend', (e) => {
   e.preventDefault();
-  if (ghostPos && currentShape && !cpuThinking && !isCpuPlayer(currentPlayer) && selectedPieceIdx !== null) {
+  if (ghostPos && currentShape && !cpuThinking && !isCpuPlayer(state.currentPlayer) && selectedPieceIdx !== null) {
     // ghostPos is already centered, so place directly without re-centering
-    if (canPlace(currentPlayer, currentShape, ghostPos.r, ghostPos.c)) {
+    if (canPlace(state.currentPlayer, currentShape, ghostPos.r, ghostPos.c)) {
       // Save undo snapshot before placing
       saveUndoState(selectedPieceIdx);
-      placePiece(currentPlayer, currentShape, ghostPos.r, ghostPos.c);
-      playerPieces[currentPlayer][selectedPieceIdx].used = true;
+      placePiece(state.currentPlayer, currentShape, ghostPos.r, ghostPos.c);
+      state.playerPieces[state.currentPlayer][selectedPieceIdx].used = true;
       selectedPieceIdx = null;
       currentShape = null;
       ghostPos = null;
-      passCount = 0;
-      syncGameState();
+      state.passCount = 0;
+
       saveGame();
       nextTurn();
     } else {
@@ -714,29 +695,29 @@ canvas.addEventListener('touchend', (e) => {
 
 function saveUndoState(pieceIdx) {
   undoState = {
-    board: board.map(row => [...row]),
-    currentPlayer: currentPlayer,
+    board: state.board.map(row => [...row]),
+    currentPlayer: state.currentPlayer,
     pieceIdx: pieceIdx,
-    pieceUsed: playerPieces.map(pp => pp.map(p => p.used)),
-    passCount: passCount,
-    playerPassed: [...playerPassed],
-    lastPlacedCells: lastPlacedCells.map(a => [...a])
+    pieceUsed: state.playerPieces.map(pp => pp.map(p => p.used)),
+    passCount: state.passCount,
+    playerPassed: [...state.playerPassed],
+    lastPlacedCells: state.lastPlacedCells.map(a => [...a])
   };
   document.getElementById('undo-btn').disabled = false;
 }
 
 function undoMove() {
-  if (!undoState || gameOver || cpuThinking) return;
+  if (!undoState || state.gameOver || cpuThinking) return;
 
   // Restore state
-  board = undoState.board;
-  currentPlayer = undoState.currentPlayer;
-  passCount = undoState.passCount;
-  playerPassed = undoState.playerPassed;
-  lastPlacedCells = undoState.lastPlacedCells.map(a => [...a]);
+  state.board = undoState.board;
+  state.currentPlayer = undoState.currentPlayer;
+  state.passCount = undoState.passCount;
+  state.playerPassed = undoState.playerPassed;
+  state.lastPlacedCells = undoState.lastPlacedCells.map(a => [...a]);
   for (let p = 0; p < 4; p++) {
-    for (let idx = 0; idx < playerPieces[p].length; idx++) {
-      playerPieces[p][idx].used = undoState.pieceUsed[p][idx];
+    for (let idx = 0; idx < state.playerPieces[p].length; idx++) {
+      state.playerPieces[p][idx].used = undoState.pieceUsed[p][idx];
     }
   }
 
@@ -745,7 +726,7 @@ function undoMove() {
   ghostPos = null;
   undoState = null;
   document.getElementById('undo-btn').disabled = true;
-  syncGameState();
+
 
   updateTurnIndicator();
   updatePieceList();
@@ -764,16 +745,16 @@ function handleBoardTap(pos) {
   const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
   const br = pos.r - midR;
   const bc = pos.c - midC;
-  if (canPlace(currentPlayer, currentShape, br, bc)) {
+  if (canPlace(state.currentPlayer, currentShape, br, bc)) {
     // Save undo snapshot before placing
     saveUndoState(selectedPieceIdx);
-    placePiece(currentPlayer, currentShape, br, bc);
-    playerPieces[currentPlayer][selectedPieceIdx].used = true;
+    placePiece(state.currentPlayer, currentShape, br, bc);
+    state.playerPieces[state.currentPlayer][selectedPieceIdx].used = true;
     selectedPieceIdx = null;
     currentShape = null;
     ghostPos = null;
-    passCount = 0;
-    syncGameState();
+    state.passCount = 0;
+  
     saveGame();
 
     nextTurn();
@@ -802,15 +783,15 @@ function showAutoPassToast(player, callback) {
 
 // ===== Turn Management =====
 function nextTurn() {
-  currentPlayer = (currentPlayer + 1) % 4;
+  state.currentPlayer = (state.currentPlayer + 1) % 4;
 
   let skipped = 0;
-  while (playerPassed[currentPlayer] && skipped < 4) {
-    currentPlayer = (currentPlayer + 1) % 4;
+  while (state.playerPassed[state.currentPlayer] && skipped < 4) {
+    state.currentPlayer = (state.currentPlayer + 1) % 4;
     skipped++;
   }
 
-  if (skipped >= 4 || passCount >= 4) {
+  if (skipped >= 4 || state.passCount >= 4) {
     endGame();
     return;
   }
@@ -820,13 +801,13 @@ function nextTurn() {
   drawBoard();
 
   // Check if current player has any valid moves
-  if (!gameOver && !playerPassed[currentPlayer] && !hasValidMove(currentPlayer)) {
+  if (!state.gameOver && !state.playerPassed[state.currentPlayer] && !hasValidMove(state.currentPlayer)) {
     // Auto-pass with notification
-    showAutoPassToast(currentPlayer, () => {
-      playerPassed[currentPlayer] = true;
-      passCount++;
+    showAutoPassToast(state.currentPlayer, () => {
+      state.playerPassed[state.currentPlayer] = true;
+      state.passCount++;
       saveGame();
-      if (passCount >= 4 || checkAllPassed()) {
+      if (state.passCount >= 4 || checkAllPassed()) {
         endGame();
       } else {
         nextTurn();
@@ -836,21 +817,21 @@ function nextTurn() {
   }
 
   // If CPU player's turn, auto-play
-  if (isCpuPlayer(currentPlayer) && !gameOver) {
+  if (isCpuPlayer(state.currentPlayer) && !state.gameOver) {
     setTimeout(executeCpuTurn, 500);
   }
 }
 
 function passTurn() {
-  if (gameOver || cpuThinking) return;
-  if (isCpuPlayer(currentPlayer)) return;
-  playerPassed[currentPlayer] = true;
-  passCount++;
+  if (state.gameOver || cpuThinking) return;
+  if (isCpuPlayer(state.currentPlayer)) return;
+  state.playerPassed[state.currentPlayer] = true;
+  state.passCount++;
   selectedPieceIdx = null;
   currentShape = null;
   ghostPos = null;
   saveGame();
-  if (passCount >= 4 || checkAllPassed()) {
+  if (state.passCount >= 4 || checkAllPassed()) {
     endGame();
   } else {
     nextTurn();
@@ -859,9 +840,9 @@ function passTurn() {
 
 function updatePlaceableCorners() {
   placeableCornersCache = [];
-  if (gameOver || isCpuPlayer(currentPlayer)) return;
-  const cp = getCornerPositions(currentPlayer);
-  const pieces = playerPieces[currentPlayer];
+  if (state.gameOver || isCpuPlayer(state.currentPlayer)) return;
+  const cp = getCornerPositions(state.currentPlayer);
+  const pieces = state.playerPieces[state.currentPlayer];
   for (const [cr, cc] of cp) {
     let canUse = false;
     for (let idx = 0; idx < pieces.length && !canUse; idx++) {
@@ -870,7 +851,7 @@ function updatePlaceableCorners() {
       for (const orient of orientations) {
         if (canUse) break;
         for (const [dr, dc] of orient) {
-          if (canPlace(currentPlayer, orient, cr - dr, cc - dc)) {
+          if (canPlace(state.currentPlayer, orient, cr - dr, cc - dc)) {
             canUse = true;
             break;
           }
@@ -883,7 +864,7 @@ function updatePlaceableCorners() {
 
 function updateTurnIndicator() {
   const el = document.getElementById('turn-indicator');
-  const p = players[currentPlayer];
+  const p = players[state.currentPlayer];
   el.textContent = '● ' + p.name;
   el.style.background = p.color;
   // Clear viewing mode on turn change
@@ -897,16 +878,16 @@ function updateStatsBar() {
   const bar = document.getElementById('stats-bar');
   bar.innerHTML = '';
   for (let i = 0; i < 4; i++) {
-    const pieces = playerPieces[i];
+    const pieces = state.playerPieces[i];
     if (!pieces) continue;
     const remaining = pieces.filter(p => !p.used).length;
     const remainingSquares = pieces.filter(p => !p.used).reduce((sum, p) => sum + p.shape.length, 0);
     const div = document.createElement('div');
-    div.className = 'stat-item' + (i === currentPlayer ? ' active' : '') + (viewingPlayer === i ? ' viewing' : '');
+    div.className = 'stat-item' + (i === state.currentPlayer ? ' active' : '') + (viewingPlayer === i ? ' viewing' : '');
     const nameRow = document.createElement('div');
     nameRow.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:3px;';
     // Add pixel art for CPU characters
-    const ch = (gameMode === 'cpu' && i !== humanPlayer) ? getCpuCharacter(i) : null;
+    const ch = (state.gameMode === 'cpu' && i !== state.humanPlayer) ? getCpuCharacter(i) : null;
     if (ch && CHAR_PIXELS[ch.id]) {
       const cvs = document.createElement('canvas');
       cvs.width = 16; cvs.height = 16;
@@ -930,7 +911,7 @@ function updateStatsBar() {
 }
 
 function toggleViewPlayer(playerIdx) {
-  if (viewingPlayer === playerIdx || playerIdx === currentPlayer) {
+  if (viewingPlayer === playerIdx || playerIdx === state.currentPlayer) {
     // Tap again or tap current player = back to own pieces
     viewingPlayer = null;
     document.getElementById('viewing-label').style.display = 'none';
@@ -949,7 +930,7 @@ function toggleViewPlayer(playerIdx) {
 function showPlayerPieces(playerIdx) {
   const list = document.getElementById('piece-list');
   list.innerHTML = '';
-  const pieces = playerPieces[playerIdx];
+  const pieces = state.playerPieces[playerIdx];
   const sortedIndices = pieces.map((_, i) => i).filter(i => !pieces[i].used).sort((a, b) => pieces[b].shape.length - pieces[a].shape.length);
   sortedIndices.forEach((idx) => {
     const p = pieces[idx];
@@ -985,7 +966,7 @@ function showScores() {
   });
   body.appendChild(div);
   document.getElementById('modal-title').textContent = 'SCORE';
-  document.getElementById('restart-btn').style.display = gameOver ? 'inline-block' : 'none';
+  document.getElementById('restart-btn').style.display = state.gameOver ? 'inline-block' : 'none';
   document.getElementById('modal-overlay').classList.add('show');
 }
 
@@ -994,7 +975,7 @@ function closeModal() {
 }
 
 function endGame() {
-  gameOver = true;
+  state.gameOver = true;
   let best = -999, winner = 0;
   players.forEach((p, i) => {
     const s = getScore(i);
@@ -1002,7 +983,7 @@ function endGame() {
   });
 
   let title;
-  if (gameMode === 'cpu') {
+  if (state.gameMode === 'cpu') {
     title = winner === 0 ? 'YOU WIN!' : players[winner].name + ' WINS';
   } else {
     title = players[winner].name + ' WINS!';
@@ -1037,16 +1018,16 @@ function endGame() {
 function saveGame() {
   try {
     const saveData = {
-      board: board,
-      currentPlayer: currentPlayer,
-      passCount: passCount,
-      gameOver: gameOver,
-      playerPassed: playerPassed,
-      gameMode: gameMode,
-      humanPlayer: humanPlayer,
-      pieceUsed: playerPieces.map(pp => pp.map(p => p.used)),
+      board: state.board,
+      currentPlayer: state.currentPlayer,
+      passCount: state.passCount,
+      gameOver: state.gameOver,
+      playerPassed: state.playerPassed,
+      gameMode: state.gameMode,
+      humanPlayer: state.humanPlayer,
+      pieceUsed: state.playerPieces.map(pp => pp.map(p => p.used)),
       cpuCharacterIds: cpuCharacters.map(c => c ? c.id : null),
-      boardSize: BOARD_SIZE,
+      boardSize: state.BOARD_SIZE,
       timestamp: Date.now()
     };
     localStorage.setItem('kado_save', JSON.stringify(saveData));
@@ -1074,17 +1055,17 @@ function resumeGame() {
   const save = loadGame();
   if (!save) return;
 
-  gameMode = save.gameMode;
-  BOARD_SIZE = save.boardSize || 20;
-  humanPlayer = save.humanPlayer !== undefined ? save.humanPlayer : 0;
+  // Restore game state via SSoT
+  restoreState(save);
+
   // Restore CPU characters from save
   if (save.cpuCharacterIds) {
     cpuCharacters = save.cpuCharacterIds.map(id => CPU_CHARACTERS.find(c => c.id === id) || CPU_CHARACTERS[0]);
   } else {
-    cpuCharacters = [CPU_CHARACTERS[3], CPU_CHARACTERS[4], CPU_CHARACTERS[5]]; // default normal
+    cpuCharacters = [CPU_CHARACTERS[3], CPU_CHARACTERS[4], CPU_CHARACTERS[5]];
   }
   // Rebuild players array
-  if (gameMode === 'cpu') {
+  if (state.gameMode === 'cpu') {
     const colors = [
       { color: '#0072B2', light: '#4da6d9' },
       { color: '#F0E442', light: '#f5ed7a' },
@@ -1094,7 +1075,7 @@ function resumeGame() {
     let cpuIdx = 0;
     players = [];
     for (let i = 0; i < 4; i++) {
-      if (i === humanPlayer) {
+      if (i === state.humanPlayer) {
         players.push({ id: i, name: 'YOU', ...colors[i] });
       } else {
         const ch = cpuCharacters[cpuIdx];
@@ -1109,36 +1090,16 @@ function resumeGame() {
 
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-
-  // Restore state
-  board = save.board;
-  currentPlayer = save.currentPlayer;
-  passCount = save.passCount;
-  gameOver = save.gameOver;
-  playerPassed = save.playerPassed;
   selectedPieceIdx = null;
   currentShape = null;
   ghostPos = null;
   cpuThinking = false;
-
-  // Restore pieces
-  playerPieces = [];
-  const resumeIdx = (BOARD_SIZE === 14) ? PIECES_14 : (BOARD_SIZE === 24) ? PIECES_24 : null;
-  for (let p = 0; p < 4; p++) {
-    if (resumeIdx) {
-      playerPieces.push(resumeIdx.map((si, idx) => ({ shape: PIECE_SHAPES[si].map(s => [...s]), used: save.pieceUsed[p][idx] })));
-    } else {
-      playerPieces.push(PIECE_SHAPES.slice(0, 21).map((shape, idx) => ({ shape: shape.map(s => [...s]), used: save.pieceUsed[p][idx] })));
-    }
-  }
-
-  syncGameState();
   updateTurnIndicator();
   resizeBoard();
   updatePieceList();
 
   // If it's CPU's turn, auto-play
-  if (isCpuPlayer(currentPlayer) && !gameOver) {
+  if (isCpuPlayer(state.currentPlayer) && !state.gameOver) {
     setTimeout(executeCpuTurn, 500);
   }
 }
@@ -1172,7 +1133,7 @@ function hideOrderSelect() {
 }
 
 function selectOrder(order) {
-  humanPlayer = order;
+  state.humanPlayer = order;
   document.getElementById('order-select').style.display = 'none';
   document.getElementById('char-select').style.display = 'flex';
   // Hide title to save space on mobile
@@ -1206,7 +1167,7 @@ function renderCharSelect() {
   // Adjust slot display based on human position
   let displayPositions = [];
   for (let i = 0; i < 4; i++) {
-    if (i === humanPlayer) continue;
+    if (i === state.humanPlayer) continue;
     displayPositions.push(i + 1);
   }
   const ordinal = displayPositions[charSelectSlot];
@@ -1250,7 +1211,7 @@ function pickCharacter(charIdx) {
       card.className = 'char-card selected';
       let pos = 0, ci = 0;
       for (let p = 0; p < 4; p++) {
-        if (p === humanPlayer) continue;
+        if (p === state.humanPlayer) continue;
         if (ci === i) { pos = p + 1; break; }
         ci++;
       }
@@ -1310,10 +1271,10 @@ function confirmBoardSize(size) {
 }
 
 function startGame(mode) {
-  BOARD_SIZE = selectedBoardSize;
+  state.BOARD_SIZE = selectedBoardSize;
   deleteSave(); // Clear old save when starting new game
-  gameMode = mode;
-  if (mode === 'local') humanPlayer = -1; // No CPU in local mode
+  state.gameMode = mode;
+  if (mode === 'local') state.humanPlayer = -1; // No CPU in local mode
 
   // Build players array with human name at correct position
   if (mode === 'cpu') {
@@ -1326,7 +1287,7 @@ function startGame(mode) {
     let cpuIdx = 0;
     players = [];
     for (let i = 0; i < 4; i++) {
-      if (i === humanPlayer) {
+      if (i === state.humanPlayer) {
         players.push({ id: i, name: 'YOU', ...colors[i] });
       } else {
         const ch = cpuCharacters[cpuIdx];
@@ -1346,35 +1307,17 @@ function startGame(mode) {
 }
 
 function initGame() {
-  board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(-1));
-  currentPlayer = 0;
+  initState(selectedBoardSize, state.gameMode, state.humanPlayer);
   selectedPieceIdx = null;
   currentShape = null;
   ghostPos = null;
-  passCount = 0;
-  gameOver = false;
-  playerPassed = [false, false, false, false];
   cpuThinking = false;
-  lastPlacedCells = [[], [], [], []];
-
-  playerPieces = [];
-  const activeIdx = (BOARD_SIZE === 14) ? PIECES_14 : (BOARD_SIZE === 24) ? PIECES_24 : null;
-  for (let p = 0; p < 4; p++) {
-    if (activeIdx) {
-      playerPieces.push(activeIdx.map(i => ({ shape: PIECE_SHAPES[i].map(s => [...s]), used: false })));
-    } else {
-      // 20x20: use only first 21 pieces (standard polyominoes)
-      playerPieces.push(PIECE_SHAPES.slice(0, 21).map(shape => ({ shape: shape.map(s => [...s]), used: false })));
-    }
-  }
-
-  syncGameState();
   updateTurnIndicator();
   resizeBoard();
   updatePieceList();
 
   // If first player is CPU, start their turn
-  if (isCpuPlayer(currentPlayer) && !gameOver) {
+  if (isCpuPlayer(state.currentPlayer) && !state.gameOver) {
     setTimeout(executeCpuTurn, 500);
   }
 }
@@ -1401,11 +1344,11 @@ function saveStats(stats) {
 }
 
 function recordGameResult() {
-  if (gameMode !== 'cpu') return;
+  if (state.gameMode !== 'cpu') return;
   const stats = loadStats();
   stats.games++;
   const scores = players.map((_, i) => getScore(i));
-  const myScore = scores[humanPlayer];
+  const myScore = scores[state.humanPlayer];
   const sorted = [...scores].sort((a, b) => b - a);
   const rank = sorted.indexOf(myScore);
   if (rank >= 0 && rank < 4) stats.ranks[rank]++;
@@ -1584,7 +1527,7 @@ function hideRules() {
 }
 
 function quitToTitle() {
-  if (!gameOver) {
+  if (!state.gameOver) {
     saveGame();
   }
   document.getElementById('app').style.display = 'none';

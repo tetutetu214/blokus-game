@@ -1,98 +1,100 @@
-# KADO - Connect by Corners
+# KADO - 角でつなぐボードゲーム
 
-A polyomino strategy board game playable on iPhone / smartphone / PC.
-No external libraries required.
+iPhone / スマホ / PC で遊べるポリオミノ戦略ボードゲーム。
+外部ライブラリ不要。
 
 GitHub Pages: https://tetutetu214.github.io/kado-game/
 
-## How to Play
+## 遊び方
 
-### Game Modes
+### ゲームモード
 
-| Mode | Description |
-|------|-------------|
-| 1P vs CPU | You vs 3 CPU opponents |
-| LOCAL 4P | Local multiplayer (pass & play) |
+| モード | 説明 |
+|--------|------|
+| 1P vs CPU | あなた vs CPU 3体 |
+| LOCAL 4P | ローカル対戦（1台で交代プレイ） |
 
-### Board Sizes
+### ボードサイズ
 
-| Size | Pieces per player | Coverage | Style |
-|------|------------------|----------|-------|
-| 14×14 | 12 (n=1-4 + 3 pentominoes) | 90% | Quick Game |
-| 20×20 | 21 (n=1-5, standard) | 89% | Standard |
-| 24×24 | 28 (n=1-5 + 7 hexominoes) | 91% | Deep Strategy |
+| サイズ | ピース数/人 | カバー率 | スタイル |
+|--------|------------|----------|----------|
+| 14×14 | 12（n=1〜4 + ペントミノ3種） | 90% | クイックゲーム |
+| 20×20 | 21（n=1〜5、標準） | 89% | スタンダード |
+| 24×24 | 28（n=1〜5 + ヘキソミノ7種） | 91% | じっくり戦略戦 |
 
-### Characters
+### キャラクター
 
-9 CPU characters with unique 16-bit pixel art. Choose any 3 as opponents (duplicates OK).
+16bitピクセルアートのCPU 9体。3体を選んで対戦（同じキャラも選択可）。
 
-| Rank | Name | Type | Caption |
-|------|------|------|---------|
-| 1 | BLAZE | ATK | Relentless force |
-| 2 | AEGIS | DEF | Unbreakable wall |
-| 3 | CHAOS | RNG | Brilliant madness |
-| 4 | SPIKE | ATK | Sharp striker |
-| 5 | PROXY | DEF | Steady shield |
-| 6 | GLITCH | RNG | Unpredictable |
-| 7 | EMBER | ATK | Fading spark |
-| 8 | ECHO | DEF | Faint signal |
-| 9 | FLICKER | RNG | Static noise |
+| Rank | 名前 | タイプ | キャッチコピー |
+|------|------|--------|---------------|
+| 1 | BLAZE | 攻撃 | Relentless force |
+| 2 | AEGIS | 防御 | Unbreakable wall |
+| 3 | CHAOS | 運 | Brilliant madness |
+| 4 | SPIKE | 攻撃 | Sharp striker |
+| 5 | PROXY | 防御 | Steady shield |
+| 6 | GLITCH | 運 | Unpredictable |
+| 7 | EMBER | 攻撃 | Fading spark |
+| 8 | ECHO | 防御 | Faint signal |
+| 9 | FLICKER | 運 | Static noise |
 
-Rank 1 = strongest. Within the same type, color intensity indicates strength.
+Rank 1が最強。同タイプ内では色の濃さで強さが異なる。
 
-### Controls
+### 操作方法
 
-1. Select a piece from the panel below
-2. **↻** Rotate / **↔** Flip
-3. Tap the board to place (dots show valid positions)
-4. **UNDO** to take back your last move
-5. Auto-pass when no valid moves (toast notification)
-6. **HOME** to save and return to title
+1. 画面下のピース一覧からピースを選択
+2. **↻** 回転 / **↔** 反転
+3. ボードをタップして配置（ドットが置ける場所を表示）
+4. **UNDO** で直前の1手を取り消し
+5. 置けるピースがない場合は自動パス（通知あり）
+6. **HOME** でゲームを保存してタイトルへ
 
-### Rules
+### ルール
 
-- Each player has a set of polyomino pieces
-- First piece must touch your **corner**
-- Subsequent pieces must connect **corner-to-corner** with your own
-- Your pieces must **never share an edge**
-- Touching other players' edges is OK
-- Game ends when all players pass
+- 各プレイヤーはポリオミノピースのセットを持つ
+- 最初のピースは自分の**コーナー（角）**に置く
+- 2手目以降は自分の既存ピースと**角で接する**位置に置く
+- 自分のピース同士は**辺で接してはいけない**
+- 他プレイヤーのピースとの辺の接触はOK
+- 全員がパスしたらゲーム終了
 
-### Scoring
+### スコア
 
-- Remaining squares × -1 point
-- All pieces placed = **+15 bonus**
-- Highest score wins
+- 残ったピースのマス数 × -1点
+- 全ピース配置で **+15ボーナス**
+- 最高スコアのプレイヤーが勝ち
 
-## Features
+## 主な機能
 
-- **3 Board Sizes**: 14×14 / 20×20 / 24×24 with mathematically balanced piece sets
-- **9 CPU Characters**: Pixel art opponents with ATK/DEF/RNG personality axes
-- **Per-Character Records**: Win rate and average score tracked per opponent
-- **Match History**: Last 10 games rank/score graph
-- **Save & Resume**: Browser saves game state automatically
-- **Undo**: Take back your last placement
-- **Auto Pass**: Automatic pass with notification when no moves available
-- **Placement Dots**: Only valid corners are highlighted
-- **All-CPU Highlight**: See where every CPU placed in the last round
-- **Ghost Preview**: Hover (PC) or drag (mobile) to preview placement
-- **Neon Arcade UI**: 90s arcade / pinball aesthetic with glow effects
+- **3種のボードサイズ**: 14×14 / 20×20 / 24×24（数学的にバランス調整済み）
+- **9体のCPUキャラクター**: 攻撃/防御/運の3軸パーソナリティ
+- **キャラ別戦績**: 対戦相手ごとの勝率・平均スコアを記録
+- **直近10戦グラフ**: 順位とスコアの推移を可視化
+- **途中保存・再開**: ブラウザに自動保存、CONTINUEで再開
+- **1手戻し（UNDO）**: 直前の配置を取り消し
+- **自動パス**: 置けるピースがない場合に自動パス＋通知
+- **配置可能ドット**: 実際に置ける場所のみにドットを表示
+- **全CPUハイライト**: 直前ラウンドの全CPUの配置を強調
+- **ゴーストプレビュー**: ホバー（PC）やドラッグ（スマホ）で配置前プレビュー
+- **ネオンアーケードUI**: 90年代ゲーセン風のグローエフェクト
+- **NEW RECORD演出**: 最高スコア更新時にネオングロー表示
+- **色覚対応**: カラーユニバーサルデザイン準拠のカラーパレット
 
-## Architecture
+## アーキテクチャ
 
 ```
-index.html          ← HTML + CSS + UI logic (ES module)
+index.html          ← HTML + CSS + UI（ES module）
 js/
-  game-logic.js     ← Pure game logic (no DOM dependencies)
-  test-logic.js     ← Module unit tests (32 tests)
-test.js             ← Legacy integration tests (79 tests)
+  game-logic.js     ← ゲームロジック（DOM非依存、Single Source of Truth）
+  test-logic.js     ← モジュール単体テスト（32件）
+test.js             ← 統合テスト（79件）
 ```
 
-Game logic is separated from UI for testability and future iOS app reuse.
+ゲームロジックはUIから分離。テスト可能で、将来のiOSアプリ移行時にそのまま再利用可能。
 
-## Running Locally
+## ローカルでの実行
 
-ES modules require a web server (file:// won't work):
+ES modulesを使用しているため、HTTPサーバー経由で開く必要があります（file://では動作しません）：
 
 ```bash
 # Python
@@ -102,24 +104,24 @@ python3 -m http.server 9000
 npx serve
 ```
 
-Then open http://localhost:9000
+http://localhost:9000 を開く
 
-## Tests
+## テスト
 
 ```bash
-# Integration tests
-node test.js        # 79 tests
+# 統合テスト
+node test.js            # 79件
 
-# Module unit tests
-node js/test-logic.js   # 32 tests
+# モジュール単体テスト
+node js/test-logic.js   # 32件
 ```
 
-## Tech Stack
+## 技術スタック
 
-- HTML / CSS / JavaScript (ES modules)
-- Canvas API for board rendering
-- Touch events (iPhone Safari / Android Chrome)
-- Mouse hover preview (PC)
-- localStorage for game saves & match records
-- CPU AI: Weighted scoring with ATK/DEF/RNG personality system
-- Colorblind-friendly palette (CUD compliant)
+- HTML / CSS / JavaScript（ES modules）
+- Canvas API によるボード描画
+- タッチイベント対応（iPhone Safari / Android Chrome）
+- マウスホバープレビュー（PC）
+- localStorage によるゲーム保存・戦績記録
+- CPU AI: 攻撃/防御/運の3軸による重み付きスコアリング
+- カラーユニバーサルデザイン準拠パレット

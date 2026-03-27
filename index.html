@@ -55,7 +55,8 @@ canvas#board { display: block; touch-action: none; }
 #modal h2 { margin-bottom: 16px; font-size: 20px; }
 #modal .scores { margin-bottom: 16px; }
 #modal .score-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 16px; }
-#modal button { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; }
+#modal button { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; }
+#modal button:hover { background: rgba(233,69,96,0.15); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
 
 /* Pass button */
 #pass-btn { background: #e94560; color: #fff; font-size: 13px; }
@@ -89,8 +90,10 @@ canvas#board { display: block; touch-action: none; }
 #stats-modal .stat-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 15px; color: #ccc; }
 #stats-modal .stat-row .label { color: #aaa; }
 #stats-modal .stat-row .value { color: #fff; font-weight: bold; }
-#stats-modal .stats-close { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
-#stats-modal .stats-reset { display: block; margin: 8px auto 0; background: none; border: none; color: #888; font-size: 12px; cursor: pointer; text-decoration: underline; }
+#stats-modal .stats-close { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; }
+#stats-modal .stats-close:hover { background: rgba(233,69,96,0.15); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
+#stats-modal .stats-reset { display: block; margin: 8px auto 0; background: none; border: none; color: #888; font-size: 12px; cursor: pointer; text-decoration: underline; transition: all 0.2s; }
+#stats-modal .stats-reset:hover { color: #e94560; }
 .feedback-link:hover, .feedback-link:active { color: #e94560; text-decoration: underline; }
 #order-select, #difficulty-select, #char-select { display: none; flex-direction: column; align-items: center; gap: 12px; }
 #order-select h2, #difficulty-select h2, #char-select h2 { font-size: 16px; margin-bottom: 4px; }

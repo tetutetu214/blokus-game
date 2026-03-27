@@ -1739,38 +1739,46 @@ function showStats() {
       ctx.fillText(i + 1, p.x, h - padB + 14);
     });
   }
-  // Character-specific win rates
-  var charIds = CPU_CHARACTERS.map(function(c) { return c.id; });
-  var hasCharData = charIds.some(function(id) { return stats.charStats[id] && stats.charStats[id].games > 0; });
-  if (hasCharData) {
-    var charTitle = document.createElement('div');
-    charTitle.style.cssText = 'margin-top:16px;font-size:14px;color:#aaa;text-align:center;margin-bottom:8px;';
-    charTitle.textContent = 'VS Character Records';
-    body.appendChild(charTitle);
-    CPU_CHARACTERS.forEach(function(ch) {
-      var cs = stats.charStats[ch.id];
-      if (!cs || cs.games === 0) return;
+  // Character-specific win rates - 3x3 grid
+  var charTitle = document.createElement('div');
+  charTitle.style.cssText = 'margin-top:16px;font-size:14px;color:#aaa;text-align:center;margin-bottom:8px;';
+  charTitle.textContent = 'VS Character Records';
+  body.appendChild(charTitle);
+  var grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:6px;';
+  CPU_CHARACTERS.forEach(function(ch) {
+    var cs = stats.charStats[ch.id];
+    var hasData = cs && cs.games > 0;
+    var cell = document.createElement('div');
+    cell.style.cssText = 'text-align:center;padding:6px 2px;border:1px solid rgba(233,69,96,0.2);border-radius:4px;' + (hasData ? '' : 'opacity:0.3;');
+    var cvs = document.createElement('canvas');
+    cvs.width = 16; cvs.height = 16;
+    cvs.style.cssText = 'width:20px;height:20px;image-rendering:pixelated;display:block;margin:0 auto 2px;';
+    drawCharPixelArt(cvs, ch.id);
+    cell.appendChild(cvs);
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:10px;font-weight:bold;color:#eee;';
+    nameEl.textContent = ch.name;
+    cell.appendChild(nameEl);
+    if (hasData) {
       var winRate = Math.round(cs.wins / cs.games * 100);
-      var avgScore = Math.round(cs.totalScore / cs.games);
-      var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:12px;color:#ccc;';
-      // Pixel art icon
-      var cvs = document.createElement('canvas');
-      cvs.width = 16; cvs.height = 16;
-      cvs.style.cssText = 'width:16px;height:16px;image-rendering:pixelated;flex-shrink:0;';
-      drawCharPixelArt(cvs, ch.id);
-      row.appendChild(cvs);
-      var nameEl = document.createElement('span');
-      nameEl.style.cssText = 'width:60px;text-align:left;font-weight:bold;color:#eee;';
-      nameEl.textContent = ch.name;
-      row.appendChild(nameEl);
-      var detailEl = document.createElement('span');
-      detailEl.style.cssText = 'flex:1;text-align:right;color:#aaa;';
-      detailEl.textContent = cs.wins + 'W ' + (cs.games - cs.wins) + 'L (' + winRate + '%) avg ' + avgScore + 'pt';
-      row.appendChild(detailEl);
-      body.appendChild(row);
-    });
-  }
+      var wl = document.createElement('div');
+      wl.style.cssText = 'font-size:9px;color:#aaa;margin-top:2px;';
+      wl.textContent = cs.wins + 'W ' + (cs.games - cs.wins) + 'L';
+      cell.appendChild(wl);
+      var pct = document.createElement('div');
+      pct.style.cssText = 'font-size:11px;font-weight:bold;margin-top:1px;color:' + (winRate >= 50 ? '#4da6d9' : '#e94560') + ';';
+      pct.textContent = winRate + '%';
+      cell.appendChild(pct);
+    } else {
+      var noData = document.createElement('div');
+      noData.style.cssText = 'font-size:9px;color:#555;margin-top:2px;';
+      noData.textContent = '---';
+      cell.appendChild(noData);
+    }
+    grid.appendChild(cell);
+  });
+  body.appendChild(grid);
   document.getElementById('stats-overlay').classList.add('show');
 }
 

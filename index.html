@@ -113,8 +113,9 @@ canvas#board { display: block; touch-action: none; }
 #auto-pass-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; z-index: 60; text-align: center; animation: fadeInOut 2s ease-in-out; pointer-events: none; }
 #auto-pass-toast .pass-name { font-weight: bold; font-size: 17px; }
 @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
-.board-size-btn { border: 2px solid #333 !important; transition: border-color 0.2s; }
-.board-size-btn.selected { border-color: #e94560 !important; box-shadow: 0 0 8px #e94560; }
+#board-size-screen { flex-direction: column; align-items: center; gap: 8px; }
+#board-size-screen h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
+#board-size-screen p { color: #888; font-size: 12px; margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -128,16 +129,11 @@ canvas#board { display: block; touch-action: none; }
       CONTINUE
       <span class="sub">Resume saved game</span>
     </button>
-    <div id="board-size-select" style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">
-      <button class="menu-btn board-size-btn" onclick="selectBoardSize(14)" style="width:auto;padding:8px 16px;font-size:13px;">14×14</button>
-      <button class="menu-btn board-size-btn selected" onclick="selectBoardSize(20)" style="width:auto;padding:8px 16px;font-size:13px;">20×20</button>
-      <button class="menu-btn board-size-btn" onclick="selectBoardSize(24)" style="width:auto;padding:8px 16px;font-size:13px;">24×24</button>
-    </div>
-    <button class="start-btn" onclick="showOrderSelect()">
+    <button class="start-btn" onclick="showBoardSizeSelect('cpu')">
       1P vs CPU
       <span class="sub">Play against AI</span>
     </button>
-    <button class="start-btn" onclick="startGame('local')">
+    <button class="start-btn" onclick="showBoardSizeSelect('local')">
       LOCAL 4P
       <span class="sub">Pass & Play</span>
     </button>
@@ -149,6 +145,23 @@ canvas#board { display: block; touch-action: none; }
       RECORDS
       <span class="sub">View match history</span>
     </button>
+  </div>
+  <div id="board-size-screen" style="display:none;">
+    <h2>SELECT BOARD SIZE</h2>
+    <p>Choose your battlefield</p>
+    <button class="start-btn" onclick="confirmBoardSize(14)">
+      14 × 14
+      <span class="sub">Quick Game · 12 pieces</span>
+    </button>
+    <button class="start-btn" onclick="confirmBoardSize(20)">
+      20 × 20
+      <span class="sub">Standard · 21 pieces</span>
+    </button>
+    <button class="start-btn" onclick="confirmBoardSize(24)">
+      24 × 24
+      <span class="sub">Deep Strategy · 28 pieces</span>
+    </button>
+    <button class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);" onclick="hideBoardSizeSelect()">BACK</button>
   </div>
   <div id="order-select">
     <h2>SELECT YOUR POSITION</h2>
@@ -1499,11 +1512,27 @@ function confirmCharSelect() {
 }
 
 let selectedBoardSize = 20;
+let pendingGameMode = 'cpu';
 
-function selectBoardSize(size) {
+function showBoardSizeSelect(mode) {
+  pendingGameMode = mode;
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('board-size-screen').style.display = 'flex';
+}
+
+function hideBoardSizeSelect() {
+  document.getElementById('board-size-screen').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
+
+function confirmBoardSize(size) {
   selectedBoardSize = size;
-  document.querySelectorAll('.board-size-btn').forEach(function(b) { b.classList.remove('selected'); });
-  event.target.classList.add('selected');
+  document.getElementById('board-size-screen').style.display = 'none';
+  if (pendingGameMode === 'cpu') {
+    showOrderSelect();
+  } else {
+    startGame('local');
+  }
 }
 
 function startGame(mode) {

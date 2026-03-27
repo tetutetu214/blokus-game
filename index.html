@@ -57,6 +57,8 @@ canvas#board { display: block; touch-action: none; }
 #modal .score-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 16px; }
 #modal button { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 8px; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; }
 #modal button:hover { background: rgba(233,69,96,0.15); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
+.new-record { font-family: 'Press Start 2P', monospace; font-size: 18px; color: #e94560; margin-top: 16px; letter-spacing: 3px; animation: neonPulse 1s ease-in-out infinite alternate; }
+@keyframes neonPulse { from { text-shadow: 0 0 5px #e94560, 0 0 10px #e94560; opacity: 0.8; } to { text-shadow: 0 0 15px #e94560, 0 0 30px #e94560, 0 0 45px #e94560; opacity: 1; } }
 
 /* Pass button */
 #pass-btn { background: #e94560; color: #fff; font-size: 13px; }
@@ -1019,8 +1021,16 @@ function endGame() {
     div.appendChild(row);
   });
   body.appendChild(div);
+
+  var newRecord = recordGameResult();
+  if (newRecord) {
+    var nr = document.createElement('div');
+    nr.className = 'new-record';
+    nr.textContent = 'NEW RECORD';
+    body.appendChild(nr);
+  }
+
   document.getElementById('modal-overlay').classList.add('show');
-  recordGameResult();
 }
 
 // ===== Save / Load =====
@@ -1400,7 +1410,8 @@ function recordGameResult() {
   const rank = sorted.indexOf(myScore);
   if (rank >= 0 && rank < 4) stats.ranks[rank]++;
   if (rank === 0) stats.wins++;
-  if (stats.bestScore === null || myScore > stats.bestScore) stats.bestScore = myScore;
+  var isNewRecord = (stats.bestScore === null || myScore > stats.bestScore);
+  if (isNewRecord) stats.bestScore = myScore;
   stats.totalScore += myScore;
   stats.history.push({ score: myScore, rank: rank + 1 });
   if (stats.history.length > 10) stats.history = stats.history.slice(-10);
@@ -1415,6 +1426,7 @@ function recordGameResult() {
     stats.charStats[ch.id].totalScore += myScore;
   }
   saveStats(stats);
+  return isNewRecord;
 }
 
 function buildCharGrid(stats) {

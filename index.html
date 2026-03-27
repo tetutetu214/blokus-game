@@ -1152,14 +1152,26 @@ function updateStatsBar() {
     const remainingSquares = pieces.filter(p => !p.used).reduce((sum, p) => sum + p.shape.length, 0);
     const div = document.createElement('div');
     div.className = 'stat-item' + (i === currentPlayer ? ' active' : '') + (viewingPlayer === i ? ' viewing' : '');
-    const nameSpan = document.createElement('div');
+    const nameRow = document.createElement('div');
+    nameRow.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:3px;';
+    // Add pixel art for CPU characters
+    const ch = (gameMode === 'cpu' && i !== humanPlayer) ? getCpuCharacter(i) : null;
+    if (ch && CHAR_PIXELS[ch.id]) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 16; cvs.height = 16;
+      cvs.style.cssText = 'width:14px;height:14px;image-rendering:pixelated;';
+      drawCharPixelArt(cvs, ch.id);
+      nameRow.appendChild(cvs);
+    }
+    const nameSpan = document.createElement('span');
     nameSpan.className = 'stat-name';
     nameSpan.style.color = players[i].color;
     nameSpan.textContent = players[i].name;
+    nameRow.appendChild(nameSpan);
     const valueSpan = document.createElement('div');
     valueSpan.className = 'stat-value';
     valueSpan.textContent = remaining + 'pcs / ' + remainingSquares + 'sq';
-    div.appendChild(nameSpan);
+    div.appendChild(nameRow);
     div.appendChild(valueSpan);
     div.onclick = () => toggleViewPlayer(i);
     bar.appendChild(div);

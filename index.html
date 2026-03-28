@@ -218,10 +218,7 @@ canvas#board { display: block; touch-action: none; }
       FEEDBACK
       <span class="sub">Bug reports & requests</span>
     </button>
-    <button class="start-btn" onclick="document.getElementById('tokusho-overlay').classList.add('show')">
-      特定商取引法に基づく表記
-      <span class="sub">Legal notice</span>
-    </button>
+    <a class="feedback-link" href="#" onclick="event.preventDefault();document.getElementById('tokusho-overlay').classList.add('show')">特定商取引法に基づく表記</a>
   </div>
   <div id="board-size-screen" style="display:none;">
     <h2>SELECT BOARD SIZE</h2>

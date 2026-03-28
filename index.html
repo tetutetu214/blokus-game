@@ -1554,7 +1554,9 @@ function quitToTitle() {
 }
 
 function backToTitle() {
-  closeModal();
+  // Force close modal (bypass gameOver check)
+  document.getElementById('modal-overlay').classList.remove('show');
+  document.getElementById('modal-close-btn').style.display = '';
   deleteSave();
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';

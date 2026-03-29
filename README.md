@@ -93,6 +93,41 @@ test.js             ← 統合テスト（79件）
 
 ゲームロジックはUIから分離。テスト可能で、将来のiOSアプリ移行時にそのまま再利用可能。
 
+## インフラ・ドメイン構成
+
+### URL構成
+
+| URL | 内容 |
+|-----|------|
+| `https://tetutetu214.com/game/kado` | KADOゲーム（正式URL） |
+| `https://tetutetu214.com/blog` | 技術ブログ（準備中） |
+| `https://tetutetu214.com/app/xxx` | 各種アプリ（今後追加予定） |
+| `https://kado-game.pages.dev` | 旧URL（引き続きアクセス可能） |
+
+### ドメイン移行の経緯
+
+| 項目 | 移行前 | 移行後 |
+|------|--------|--------|
+| ドメイン管理 | Xserver（tetutetu.net） | Cloudflare Registrar（tetutetu214.com） |
+| DNS管理 | AWS Route 53 | Cloudflare DNS（無料） |
+| 年間コスト | 約2,892円 | 約1,621円（約1,271円節約） |
+
+コスト削減・管理の一本化・将来的な拡張性確保を目的にCloudflareへ移行。
+
+### ルーティング構成（Cloudflare Workers）
+
+Cloudflare Workersでパスベースのルーティングを行い、各Cloudflare Pagesに転送している。
+
+```javascript
+// /game/kado → kado-game.pages.dev に転送
+if (path.startsWith("/game/kado")) {
+  const newPath = path.replace("/game/kado", "");
+  return fetch("https://kado-game.pages.dev" + (newPath || "/"));
+}
+```
+
+新しいアプリやサービスを追加する場合は、Workerにルートを1行追記するだけで拡張できる。
+
 ## 開発フロー（デプロイ戦略）
 
 ### 方針

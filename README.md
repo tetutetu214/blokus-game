@@ -76,6 +76,7 @@ Rank 1が最強。同タイプ内では色の濃さで強さが異なる。
 - **配置可能ドット**: 実際に置ける場所のみにドットを表示
 - **全CPUハイライト**: 直前ラウンドの全CPUの配置を強調
 - **ゴーストプレビュー**: ホバー（PC）やドラッグ（スマホ）で配置前プレビュー
+- **インタラクティブチュートリアル**: ステップ形式でルールと操作を学べるガイド
 - **ネオンアーケードUI**: 90年代ゲーセン風のグローエフェクト
 - **NEW RECORD演出**: 最高スコア更新時にネオングロー表示
 - **順位付きリザルト**: ゲーム終了時にスコア順で#1〜#4を表示
@@ -84,14 +85,22 @@ Rank 1が最強。同タイプ内では色の濃さで強さが異なる。
 ## アーキテクチャ
 
 ```
-index.html          ← HTML + CSS + UI（ES module）
+index.html                ← HTML + CSS + UI（ES module）
 js/
-  game-logic.js     ← ゲームロジック（DOM非依存、Single Source of Truth）
-  test-logic.js     ← モジュール単体テスト（32件）
-test.js             ← 統合テスト（79件）
+  game-logic.js           ← ゲームロジック（DOM非依存、Single Source of Truth）
+  worker.js               ← CPU AI用 Web Worker（メインスレッド非ブロック）
+  test-logic.js           ← モジュール単体テスト（32件）
+test.js                   ← 統合テスト（79件）
+test.html                 ← ブラウザ用テストランナー
+legal.html                ← 特定商取引法に基づく表記
+ogp.png                   ← SNSシェア用OGP画像
+robots.txt                ← クローラー制御
+sitemap.xml               ← サイトマップ
+.github/workflows/
+  deploy-pages.yml        ← GitHub Pages自動デプロイ
 ```
 
-ゲームロジックはUIから分離。テスト可能で、将来のiOSアプリ移行時にそのまま再利用可能。
+ゲームロジックはUIから分離。テスト可能で、将来のiOSアプリ移行時にそのまま再利用可能。CPU AIの計算はWeb Workerで別スレッド実行し、UIの応答性を確保。
 
 ## インフラ・ドメイン構成
 
@@ -156,7 +165,7 @@ Cloudflare PagesがプレビューURLを自動生成（本番に影響なし）
 | `docs/` | ドキュメント更新 | `docs/readme-update` |
 
 ### なぜこの構成か
-GitHub Actionsを使わずにCI/CDに近い安全性を実現している。Cloudflare Pagesはmainブランチ以外へのpushに対して自動でプレビューデプロイを行う機能を持っており、テスト環境として活用できる。
+Cloudflare Pagesはmainブランチ以外へのpushに対して自動でプレビューデプロイを行う機能を持っており、テスト環境として活用できる。加えて、GitHub Actionsによる GitHub Pages への自動デプロイも併用している。
 
 ## ローカルでの実行
 
@@ -178,8 +187,8 @@ http://localhost:9000 を開く
 # 統合テスト
 node test.js            # 79件
 
-# モジュール単体テスト
-node js/test-logic.js   # 32件
+# モジュール単体テスト（ブラウザで実行）
+# test.html をHTTPサーバー経由で開く
 ```
 
 ## SEO・OGP の仕組み
@@ -233,5 +242,6 @@ XのサーバーがそのURLにアクセス
 - タッチイベント対応（iPhone Safari / Android Chrome）
 - マウスホバープレビュー（PC）
 - localStorage によるゲーム保存・戦績記録
+- Web Worker による CPU AI 非同期実行
 - CPU AI: 攻撃/防御/運の3軸による重み付きスコアリング
 - カラーユニバーサルデザイン準拠パレット

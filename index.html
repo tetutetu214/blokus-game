@@ -174,6 +174,9 @@ canvas#board { display: block; touch-action: none; }
 #auto-pass-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; z-index: 60; text-align: center; animation: fadeInOut 2s ease-in-out; pointer-events: none; }
 #auto-pass-toast .pass-name { font-weight: bold; font-size: 17px; }
 @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#battle-menu { flex-direction: column; align-items: center; gap: 16px; }
+#battle-menu h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
+#battle-menu p { color: #888; font-size: 12px; margin-bottom: 4px; }
 #board-size-screen { flex-direction: column; align-items: center; gap: 8px; }
 #board-size-screen h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
 #board-size-screen p { color: #888; font-size: 12px; margin-bottom: 4px; }
@@ -209,13 +212,13 @@ canvas#board { display: block; touch-action: none; }
       CONTINUE
       <span class="sub">Resume saved game</span>
     </button>
-    <button id="btn-vs-cpu" class="start-btn">
-      1P vs CPU
-      <span class="sub">Play against AI</span>
+    <button id="btn-battle" class="start-btn">
+      BATTLE
+      <span class="sub">1P vs CPU / Local multiplayer</span>
     </button>
-    <button id="btn-local-4p" class="start-btn">
-      LOCAL 4P
-      <span class="sub">Pass & Play</span>
+    <button id="btn-puzzle" class="start-btn" disabled style="opacity:0.4;cursor:default;">
+      PUZZLE
+      <span class="sub">Coming soon</span>
     </button>
     <button id="btn-tutorial" class="start-btn">
       TUTORIAL
@@ -230,6 +233,19 @@ canvas#board { display: block; touch-action: none; }
       <span class="sub">Bug reports & requests</span>
     </button>
     <a class="feedback-link" href="https://tetutetu214.com/game/kado/legal">特定商取引法に基づく表記</a>
+  </div>
+  <div id="battle-menu" style="display:none;">
+    <h2>BATTLE</h2>
+    <p>Select battle mode</p>
+    <button id="btn-vs-cpu" class="start-btn">
+      1P vs CPU
+      <span class="sub">Play against AI</span>
+    </button>
+    <button id="btn-local-4p" class="start-btn">
+      LOCAL 4P
+      <span class="sub">Pass & Play</span>
+    </button>
+    <button id="btn-battle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
   </div>
   <div id="board-size-screen" style="display:none;">
     <h2>SELECT BOARD SIZE</h2>
@@ -1306,7 +1322,7 @@ function showOrderSelect() {
 
 function hideOrderSelect() {
   document.getElementById('order-select').style.display = 'none';
-  document.getElementById('main-menu').style.display = '';
+  document.getElementById('board-size-screen').style.display = 'flex';
 }
 
 function selectOrder(order) {
@@ -1426,15 +1442,25 @@ function confirmCharSelect() {
 let selectedBoardSize = 20;
 let pendingGameMode = 'cpu';
 
+function showBattleMenu() {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('battle-menu').style.display = 'flex';
+}
+
+function hideBattleMenu() {
+  document.getElementById('battle-menu').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
+
 function showBoardSizeSelect(mode) {
   pendingGameMode = mode;
-  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('battle-menu').style.display = 'none';
   document.getElementById('board-size-screen').style.display = 'flex';
 }
 
 function hideBoardSizeSelect() {
   document.getElementById('board-size-screen').style.display = 'none';
-  document.getElementById('main-menu').style.display = 'flex';
+  document.getElementById('battle-menu').style.display = 'flex';
 }
 
 function confirmBoardSize(size) {
@@ -1709,6 +1735,7 @@ function quitToTitle() {
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
+  document.getElementById('battle-menu').style.display = 'none';
   hideOrderSelect();
   document.getElementById('char-select').style.display = 'none';
   const save = loadGame();
@@ -1726,6 +1753,7 @@ function backToTitle() {
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
+  document.getElementById('battle-menu').style.display = 'none';
   hideOrderSelect();
   document.getElementById('char-select').style.display = 'none';
 }
@@ -1968,6 +1996,7 @@ function endTutorial() {
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
+  document.getElementById('battle-menu').style.display = 'none';
 }
 
 // Called when placement fails during tutorial - show edge NG feedback
@@ -2005,6 +2034,8 @@ function onTutorialPiecePlaced() {
 function setupEventListeners() {
   // Start screen
   document.getElementById('continue-btn').addEventListener('click', resumeGame);
+  document.getElementById('btn-battle').addEventListener('click', showBattleMenu);
+  document.getElementById('btn-battle-back').addEventListener('click', hideBattleMenu);
   document.getElementById('btn-vs-cpu').addEventListener('click', function() { showBoardSizeSelect('cpu'); });
   document.getElementById('btn-local-4p').addEventListener('click', function() { showBoardSizeSelect('local'); });
   document.getElementById('btn-tutorial').addEventListener('click', startTutorial);

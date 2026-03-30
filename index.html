@@ -180,6 +180,14 @@ canvas#board { display: block; touch-action: none; }
 #board-size-screen { flex-direction: column; align-items: center; gap: 8px; }
 #board-size-screen h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
 #board-size-screen p { color: #888; font-size: 12px; margin-bottom: 4px; }
+#round-select { flex-direction: column; align-items: center; gap: 8px; }
+#round-select h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
+#round-select p { color: #888; font-size: 12px; margin-bottom: 4px; }
+#round-indicator { display: none; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #e94560; margin-left: 8px; }
+#round-indicator.show { display: inline; }
+#series-scores { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+#series-scores h3 { font-size: 12px; color: #e94560; margin-bottom: 6px; text-align: center; }
+.series-score-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 13px; }
 
 /* Tutorial overlay */
 #tutorial-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 300; justify-content: center; align-items: center; }
@@ -245,6 +253,10 @@ canvas#board { display: block; touch-action: none; }
       LOCAL 4P
       <span class="sub">Pass & Play</span>
     </button>
+    <button id="btn-continuous" class="start-btn">
+      CONTINUOUS BATTLE
+      <span class="sub">Best of 3 / 5 / 10</span>
+    </button>
     <button id="btn-battle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
   </div>
   <div id="board-size-screen" style="display:none;">
@@ -283,6 +295,23 @@ canvas#board { display: block; touch-action: none; }
       <button class="order-btn" id="char-start-btn" style="background:transparent;border:1px solid #e94560;color:#e94560;width:auto;padding:10px 20px;display:none;">START!</button>
     </div>
   </div>
+  <div id="round-select" style="display:none;">
+    <h2>ROUNDS</h2>
+    <p>How many rounds?</p>
+    <button id="btn-round-3" class="start-btn">
+      3 ROUNDS
+      <span class="sub">Quick series</span>
+    </button>
+    <button id="btn-round-5" class="start-btn">
+      5 ROUNDS
+      <span class="sub">Standard series</span>
+    </button>
+    <button id="btn-round-10" class="start-btn">
+      10 ROUNDS
+      <span class="sub">Full series</span>
+    </button>
+    <button id="btn-round-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
 </div>
 
 <!-- 特定商取引法モーダル -->
@@ -292,6 +321,7 @@ canvas#board { display: block; touch-action: none; }
   <div id="header">
     <h1>KADO</h1>
     <span id="turn-indicator">● P1</span>
+    <span id="round-indicator"></span>
     <button id="score-btn">SCORE</button>
   </div>
   <div id="stats-bar"></div>
@@ -1150,6 +1180,31 @@ function closeModal() {
 
 function endGame() {
   state.gameOver = true;
+
+  // Accumulate scores for continuous mode
+  if (continuousMode) {
+    players.forEach((p, i) => {
+      seriesScores[i] += getScore(i);
+    });
+  }
+
+  // Check if this is a mid-series round
+  if (continuousMode && currentRound < totalRounds) {
+    showRoundResult();
+    return;
+  }
+
+  // Final result (single game or last round of series)
+  if (continuousMode) {
+    showSeriesFinalResult();
+    return;
+  }
+
+  // Standard single-game result
+  showSingleGameResult();
+}
+
+function showSingleGameResult() {
   let best = -999, winner = 0;
   players.forEach((p, i) => {
     const s = getScore(i);
@@ -1194,6 +1249,116 @@ function endGame() {
   }
 
   document.getElementById('modal-overlay').classList.add('show');
+}
+
+function showRoundResult() {
+  document.getElementById('modal-title').textContent = 'ROUND ' + currentRound + ' COMPLETE';
+  document.getElementById('modal-close-btn').style.display = 'none';
+  document.getElementById('restart-btn').style.display = 'none';
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+
+  // This round's scores
+  const div = document.createElement('div');
+  div.className = 'scores';
+  const ranked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
+  ranked.sort((a, b) => b.score - a.score);
+  ranked.forEach((r, pos) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    const rankLabel = '#' + (pos + 1);
+    const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
+    const scoreHtml = `<span>${r.score}pts</span>`;
+    row.innerHTML = nameHtml + scoreHtml;
+    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+    div.appendChild(row);
+  });
+  body.appendChild(div);
+
+  // Cumulative series scores
+  const seriesDiv = document.createElement('div');
+  seriesDiv.id = 'series-scores';
+  seriesDiv.innerHTML = '<h3>TOTAL (' + currentRound + '/' + totalRounds + ')</h3>';
+  const seriesRanked = players.map((p, i) => ({ player: p, idx: i, score: seriesScores[i] }));
+  seriesRanked.sort((a, b) => b.score - a.score);
+  seriesRanked.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'series-score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    row.innerHTML = `<span style="color:${r.player.color}">${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.fontWeight = 'bold';
+    seriesDiv.appendChild(row);
+  });
+  body.appendChild(seriesDiv);
+
+  // Next round button
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'start-btn';
+  nextBtn.style.cssText = 'margin-top:16px;width:100%;';
+  nextBtn.textContent = 'NEXT ROUND';
+  nextBtn.addEventListener('click', startNextRound);
+  body.appendChild(nextBtn);
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function startNextRound() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  currentRound++;
+  updateRoundIndicator();
+  initGame();
+}
+
+function showSeriesFinalResult() {
+  let best = -999, winner = 0;
+  seriesScores.forEach((s, i) => {
+    if (s > best) { best = s; winner = i; }
+  });
+
+  const title = winner === state.humanPlayer ? 'YOU WIN THE SERIES!' : players[winner].name + ' WINS THE SERIES!';
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-close-btn').style.display = 'none';
+  document.getElementById('restart-btn').style.display = 'inline-block';
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+
+  // Final round scores
+  const roundDiv = document.createElement('div');
+  roundDiv.className = 'scores';
+  const roundRanked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
+  roundRanked.sort((a, b) => b.score - a.score);
+  roundRanked.forEach((r, pos) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    const rankLabel = '#' + (pos + 1);
+    row.innerHTML = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+    roundDiv.appendChild(row);
+  });
+  body.appendChild(roundDiv);
+
+  // Final cumulative scores
+  const seriesDiv = document.createElement('div');
+  seriesDiv.id = 'series-scores';
+  seriesDiv.innerHTML = '<h3>FINAL TOTAL</h3>';
+  const seriesRanked = players.map((p, i) => ({ player: p, idx: i, score: seriesScores[i] }));
+  seriesRanked.sort((a, b) => b.score - a.score);
+  seriesRanked.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'series-score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    row.innerHTML = `<span style="color:${r.player.color}">${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.fontWeight = 'bold';
+    seriesDiv.appendChild(row);
+  });
+  body.appendChild(seriesDiv);
+
+  document.getElementById('modal-overlay').classList.add('show');
+  resetContinuousState();
 }
 
 // ===== Save / Load =====
@@ -1328,6 +1493,14 @@ function hideOrderSelect() {
 function selectOrder(order) {
   state.humanPlayer = order;
   document.getElementById('order-select').style.display = 'none';
+  if (pendingGameMode === 'continuous') {
+    showRoundSelect();
+  } else {
+    showCharSelectScreen();
+  }
+}
+
+function showCharSelectScreen() {
   document.getElementById('char-select').style.display = 'flex';
   // Hide title to save space on mobile
   document.querySelector('#start-screen > h1').style.display = 'none';
@@ -1335,6 +1508,24 @@ function selectOrder(order) {
   charSelectSlot = 0;
   cpuCharacters = [null, null, null];
   renderCharSelect();
+}
+
+function showRoundSelect() {
+  document.getElementById('round-select').style.display = 'flex';
+}
+
+function hideRoundSelect() {
+  document.getElementById('round-select').style.display = 'none';
+  document.getElementById('order-select').style.display = 'flex';
+}
+
+function confirmRounds(rounds) {
+  totalRounds = rounds;
+  currentRound = 1;
+  continuousMode = true;
+  seriesScores = [0, 0, 0, 0];
+  document.getElementById('round-select').style.display = 'none';
+  showCharSelectScreen();
 }
 
 let charSelectSlot = 0;
@@ -1347,9 +1538,13 @@ function charSelectBack() {
     renderCharSelect();
   } else {
     document.getElementById('char-select').style.display = 'none';
-    document.getElementById('order-select').style.display = 'flex';
     document.querySelector('#start-screen > h1').style.display = '';
     document.querySelector('#start-screen > p').style.display = '';
+    if (pendingGameMode === 'continuous') {
+      document.getElementById('round-select').style.display = 'flex';
+    } else {
+      document.getElementById('order-select').style.display = 'flex';
+    }
   }
 }
 
@@ -1435,12 +1630,36 @@ function confirmCharSelect() {
   setTimeout(function() {
     document.getElementById('char-select').style.display = 'none';
     document.getElementById('char-start-btn').disabled = false;
-    startGame('cpu');
+    startGame(pendingGameMode === 'continuous' ? 'continuous' : 'cpu');
   }, 600);
 }
 
 let selectedBoardSize = 20;
 let pendingGameMode = 'cpu';
+
+// Continuous Battle state
+let continuousMode = false;
+let totalRounds = 0;
+let currentRound = 0;
+let seriesScores = [0, 0, 0, 0]; // cumulative scores per player
+
+function resetContinuousState() {
+  continuousMode = false;
+  totalRounds = 0;
+  currentRound = 0;
+  seriesScores = [0, 0, 0, 0];
+  document.getElementById('round-indicator').classList.remove('show');
+}
+
+function updateRoundIndicator() {
+  var el = document.getElementById('round-indicator');
+  if (continuousMode) {
+    el.textContent = 'R' + currentRound + '/' + totalRounds;
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
 
 function showBattleMenu() {
   document.getElementById('main-menu').style.display = 'none';
@@ -1466,7 +1685,7 @@ function hideBoardSizeSelect() {
 function confirmBoardSize(size) {
   selectedBoardSize = size;
   document.getElementById('board-size-screen').style.display = 'none';
-  if (pendingGameMode === 'cpu') {
+  if (pendingGameMode === 'cpu' || pendingGameMode === 'continuous') {
     showOrderSelect();
   } else {
     startGame('local');
@@ -1476,11 +1695,12 @@ function confirmBoardSize(size) {
 function startGame(mode) {
   state.BOARD_SIZE = selectedBoardSize;
   deleteSave(); // Clear old save when starting new game
-  state.gameMode = mode;
+  // For continuous mode, use 'cpu' internally for game logic
+  state.gameMode = (mode === 'continuous') ? 'cpu' : mode;
   if (mode === 'local') state.humanPlayer = -1; // No CPU in local mode
 
   // Build players array with human name at correct position
-  if (mode === 'cpu') {
+  if (mode === 'cpu' || mode === 'continuous') {
     const colors = [
       { color: '#0072B2', light: '#4da6d9' },
       { color: '#F0E442', light: '#f5ed7a' },
@@ -1505,6 +1725,10 @@ function startGame(mode) {
 
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+
+  if (continuousMode) {
+    updateRoundIndicator();
+  }
 
   initGame();
 }
@@ -1727,9 +1951,10 @@ function quitToTitle() {
     endTutorial();
     return;
   }
-  if (!state.gameOver) {
+  if (!state.gameOver && !continuousMode) {
     saveGame();
   }
+  resetContinuousState();
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';
   document.querySelector('#start-screen > h1').style.display = '';
@@ -1739,6 +1964,7 @@ function quitToTitle() {
   document.getElementById('board-size-screen').style.display = 'none';
   document.getElementById('order-select').style.display = 'none';
   document.getElementById('char-select').style.display = 'none';
+  document.getElementById('round-select').style.display = 'none';
   const save = loadGame();
   const continueBtn = document.getElementById('continue-btn');
   if (continueBtn) continueBtn.style.display = save ? 'inline-block' : 'none';
@@ -1749,6 +1975,7 @@ function backToTitle() {
   document.getElementById('modal-overlay').classList.remove('show');
   document.getElementById('modal-close-btn').style.display = '';
   deleteSave();
+  resetContinuousState();
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';
   document.querySelector('#start-screen > h1').style.display = '';
@@ -1758,6 +1985,7 @@ function backToTitle() {
   document.getElementById('board-size-screen').style.display = 'none';
   document.getElementById('order-select').style.display = 'none';
   document.getElementById('char-select').style.display = 'none';
+  document.getElementById('round-select').style.display = 'none';
 }
 
 window.addEventListener('resize', () => {
@@ -2040,6 +2268,7 @@ function setupEventListeners() {
   document.getElementById('btn-battle-back').addEventListener('click', hideBattleMenu);
   document.getElementById('btn-vs-cpu').addEventListener('click', function() { showBoardSizeSelect('cpu'); });
   document.getElementById('btn-local-4p').addEventListener('click', function() { showBoardSizeSelect('local'); });
+  document.getElementById('btn-continuous').addEventListener('click', function() { showBoardSizeSelect('continuous'); });
   document.getElementById('btn-tutorial').addEventListener('click', startTutorial);
   document.getElementById('btn-stats').addEventListener('click', showStats);
 
@@ -2048,6 +2277,12 @@ function setupEventListeners() {
   document.getElementById('btn-size-20').addEventListener('click', function() { confirmBoardSize(20); });
   document.getElementById('btn-size-24').addEventListener('click', function() { confirmBoardSize(24); });
   document.getElementById('btn-size-back').addEventListener('click', hideBoardSizeSelect);
+
+  // Round select
+  document.getElementById('btn-round-3').addEventListener('click', function() { confirmRounds(3); });
+  document.getElementById('btn-round-5').addEventListener('click', function() { confirmRounds(5); });
+  document.getElementById('btn-round-10').addEventListener('click', function() { confirmRounds(10); });
+  document.getElementById('btn-round-back').addEventListener('click', hideRoundSelect);
 
   // Order select
   document.getElementById('btn-order-0').addEventListener('click', function() { selectOrder(0); });

@@ -218,8 +218,8 @@ canvas#board { display: block; touch-action: none; }
       <span class="sub">Pass & Play</span>
     </button>
     <button id="btn-puzzle" class="start-btn">
-      1P PUZZLE
-      <span class="sub">Place all 84 pieces</span>
+      PERFECT PLACE
+      <span class="sub">Place all pieces on the board</span>
     </button>
     <button id="btn-tutorial" class="start-btn">
       TUTORIAL
@@ -1364,7 +1364,7 @@ function updateContinueButton() {
   if (save && !save.gameOver) {
     const date = new Date(save.timestamp);
     const timeStr = date.toLocaleString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : save.gameMode === 'puzzle' ? 'Puzzle' : 'Local 4P';
+    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : save.gameMode === 'puzzle' ? 'Perfect Place' : 'Local 4P';
     btn.querySelector('.sub').textContent = modeStr + ' - ' + timeStr;
     btn.style.display = '';
   } else {

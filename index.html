@@ -126,14 +126,6 @@ canvas#board { display: block; touch-action: none; }
 #main-menu { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .feedback-link { font-size: 12px; color: #888; text-decoration: none; margin-top: 8px; }
 .feedback-link:hover, .feedback-link:active { color: #e94560; text-decoration: underline; }
-#rules-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
-#rules-overlay.show { display: flex; }
-#rules-modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 20px; max-width: 360px; width: 90%; max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
-#rules-modal h2 { text-align: center; font-size: 20px; margin-bottom: 12px; }
-#rules-modal h3 { font-size: 15px; color: #e94560; margin: 14px 0 6px; }
-#rules-modal p, #rules-modal li { font-size: 13px; line-height: 1.6; color: #ccc; }
-#rules-modal ul { padding-left: 18px; margin: 4px 0; }
-#rules-modal .rules-close { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
 #stats-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
 #stats-overlay.show { display: flex; }
 #stats-modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 20px; max-width: 700px; width: 90%; text-align: center; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
@@ -228,10 +220,6 @@ canvas#board { display: block; touch-action: none; }
     <button id="btn-tutorial" class="start-btn" style="border-color:rgba(0,200,150,0.5);box-shadow:0 0 8px rgba(0,200,150,0.15),inset 0 0 8px rgba(0,200,150,0.05);">
       TUTORIAL
       <span class="sub">Learn by playing</span>
-    </button>
-    <button id="btn-rules" class="start-btn">
-      HOW TO PLAY
-      <span class="sub">Learn the rules</span>
     </button>
     <button id="btn-stats" class="start-btn">
       RECORDS
@@ -1660,13 +1648,6 @@ function resetStats() {
   }
 }
 
-function showRules() {
-  document.getElementById('rules-overlay').classList.add('show');
-}
-
-function hideRules() {
-  document.getElementById('rules-overlay').classList.remove('show');
-}
 
 function quitToTitle() {
   if (tutorialActive) {
@@ -1980,7 +1961,6 @@ function setupEventListeners() {
   document.getElementById('btn-vs-cpu').addEventListener('click', function() { showBoardSizeSelect('cpu'); });
   document.getElementById('btn-local-4p').addEventListener('click', function() { showBoardSizeSelect('local'); });
   document.getElementById('btn-tutorial').addEventListener('click', startTutorial);
-  document.getElementById('btn-rules').addEventListener('click', showRules);
   document.getElementById('btn-stats').addEventListener('click', showStats);
 
   // Board size select
@@ -2021,11 +2001,6 @@ function setupEventListeners() {
   document.getElementById('stats-close-btn').addEventListener('click', hideStats);
   document.getElementById('stats-reset-btn').addEventListener('click', resetStats);
 
-  // Rules overlay
-  document.getElementById('rules-overlay').addEventListener('click', hideRules);
-  document.getElementById('rules-modal').addEventListener('click', function(e) { e.stopPropagation(); });
-  document.getElementById('rules-close-btn').addEventListener('click', hideRules);
-
   // Tutorial overlay
   document.getElementById('tutorial-next-btn').addEventListener('click', function() {
     if (tutorialActive && TUTORIAL_STEPS[tutorialStep] && TUTORIAL_STEPS[tutorialStep].buttonText === 'BACK TO TITLE') {
@@ -2058,29 +2033,5 @@ setupEventListeners();
 </div>
 <div id="tutorial-hint"></div>
 
-<div id="rules-overlay">
-  <div id="rules-modal">
-    <h2>HOW TO PLAY</h2>
-    <h3>OBJECTIVE</h3>
-    <p>Place as many pieces as possible on the board!<br>Fewer remaining squares = higher score.</p>
-    <h3>PLACEMENT RULES</h3>
-    <ul>
-      <li>First piece must touch your <b>corner</b></li>
-      <li>Next pieces must connect <b>corner-to-corner</b> with your own</li>
-      <li>Your pieces must <b>never share an edge</b></li>
-      <li>Touching other players' edges is OK</li>
-    </ul>
-    <h3>CONTROLS</h3>
-    <ul>
-      <li>Select a piece from the panel below</li>
-      <li><b>↻</b> Rotate / <b>↔</b> Flip to change orientation</li>
-      <li>Tap the board to place</li>
-      <li><b>● Dots</b> show valid positions</li>
-    </ul>
-    <h3>SCORING</h3>
-    <p>Remaining squares × -1 point<br>All pieces placed = +15 bonus!</p>
-    <button id="rules-close-btn" class="rules-close">CLOSE</button>
-  </div>
-</div>
 </body>
 </html>

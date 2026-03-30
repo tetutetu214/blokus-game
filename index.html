@@ -298,15 +298,8 @@ canvas#board { display: block; touch-action: none; }
   </div>
 </div>
 
-<script type="module">
-import {
-  state, initState, restoreState,
-  PIECE_SHAPES, PIECES_14, PIECES_24,
-  rotateCW, flipH, normalize, getAllOrientations,
-  isFirstMove, getStartCorner, canPlace, placePiece,
-  getCornerPositions, countNewCorners, countBlockedOpponentCorners, getCenterDistance,
-  cpuMove as cpuMoveLogic, getScore, hasValidMove
-} from './js/game-logic.js';
+<script src="js/game-logic.js"></script>
+<script>
 
 // ===== Constants =====
 // state.BOARD_SIZE is now in state (game-logic.js)
@@ -571,10 +564,54 @@ function flipPiece() {
 }
 
 // Web Worker for CPU AI (separate thread)
-const cpuWorker = new Worker('./js/worker.js', { type: 'module' });
+var cpuWorker = null;
+var workerFailed = false;
 
-cpuWorker.onmessage = function(e) {
-  const move = e.data;
+try {
+  cpuWorker = new Worker('./js/worker.js');
+} catch(e) {
+  console.warn('Worker creation failed, using main thread fallback:', e);
+  workerFailed = true;
+}
+
+if (cpuWorker) {
+  cpuWorker.onmessage = function(e) {
+    var move = e.data;
+    if (move) {
+      placePiece(state.currentPlayer, move.shape, move.br, move.bc);
+      state.playerPieces[state.currentPlayer][move.idx].used = true;
+      state.passCount = 0;
+    } else {
+      state.playerPassed[state.currentPlayer] = true;
+      state.passCount++;
+    }
+
+    cpuThinking = false;
+    document.getElementById('cpu-thinking').style.display = 'none';
+    saveGame();
+
+    if (state.passCount >= 4 || checkAllPassed()) {
+      endGame();
+      return;
+    }
+
+    nextTurn();
+  };
+
+  cpuWorker.onerror = function(e) {
+    console.warn('Worker error, falling back to main thread:', e);
+    workerFailed = true;
+    if (cpuThinking) {
+      setTimeout(cpuMoveFallback, 100);
+    }
+  };
+}
+
+function cpuMoveFallback() {
+  var ch = getCpuCharacter(state.currentPlayer);
+  var params = getCpuParams(ch);
+  var move = cpuMove(state.currentPlayer, params);
+
   if (move) {
     placePiece(state.currentPlayer, move.shape, move.br, move.bc);
     state.playerPieces[state.currentPlayer][move.idx].used = true;
@@ -594,7 +631,7 @@ cpuWorker.onmessage = function(e) {
   }
 
   nextTurn();
-};
+}
 
 function executeCpuTurn() {
   if (state.gameOver || !isCpuPlayer(state.currentPlayer)) return;
@@ -602,19 +639,25 @@ function executeCpuTurn() {
   cpuThinking = true;
   document.getElementById('cpu-thinking').style.display = 'block';
 
-  const ch = getCpuCharacter(state.currentPlayer);
-  const params = getCpuParams(ch);
+  // Fallback to main thread if Worker is unavailable
+  if (workerFailed || !cpuWorker) {
+    setTimeout(cpuMoveFallback, 100);
+    return;
+  }
+
+  var ch = getCpuCharacter(state.currentPlayer);
+  var params = getCpuParams(ch);
 
   // Send state snapshot to worker (separate thread)
   cpuWorker.postMessage({
     state: {
       BOARD_SIZE: state.BOARD_SIZE,
-      board: state.board.map(row => [...row]),
-      playerPieces: state.playerPieces.map(pp => pp.map(p => ({ shape: p.shape.map(s => [...s]), used: p.used }))),
+      board: state.board.map(function(row) { return row.slice(); }),
+      playerPieces: state.playerPieces.map(function(pp) { return pp.map(function(p) { return { shape: p.shape.map(function(s) { return s.slice(); }), used: p.used }; }); }),
       passCount: state.passCount,
       gameOver: state.gameOver,
-      playerPassed: [...state.playerPassed],
-      lastPlacedCells: state.lastPlacedCells.map(a => [...a]),
+      playerPassed: state.playerPassed.slice(),
+      lastPlacedCells: state.lastPlacedCells.map(function(a) { return a.slice(); }),
       humanPlayer: state.humanPlayer,
       gameMode: state.gameMode,
     },
@@ -1067,7 +1110,7 @@ function endGame() {
 
   let title;
   if (state.gameMode === 'cpu') {
-    title = winner === 0 ? 'YOU WIN!' : players[winner].name + ' WINS';
+    title = winner === state.humanPlayer ? 'YOU WIN!' : players[winner].name + ' WINS';
   } else {
     title = players[winner].name + ' WINS!';
   }
@@ -1209,8 +1252,12 @@ function updateContinueButton() {
   }
 }
 
-// Show continue button on load
-document.addEventListener('DOMContentLoaded', updateContinueButton);
+// Initialize event listeners and UI after DOM is ready
+// (script loads before stats-overlay and rules-overlay elements)
+document.addEventListener('DOMContentLoaded', function() {
+  setupEventListeners();
+  updateContinueButton();
+});
 
 // iOS Safari ピンチズーム防止（user-scalable=no が無視されるため）
 document.addEventListener('touchmove', (e) => {
@@ -1715,8 +1762,6 @@ function setupEventListeners() {
   document.getElementById('rules-modal').addEventListener('click', function(e) { e.stopPropagation(); });
   document.getElementById('rules-close-btn').addEventListener('click', hideRules);
 }
-
-setupEventListeners();
 </script>
 <div id="stats-overlay">
   <div id="stats-modal">

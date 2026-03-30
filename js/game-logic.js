@@ -1,8 +1,9 @@
 // game-logic.js - Pure game logic (no DOM dependencies)
 // Single Source of Truth: all game state lives here.
-// UI reads state via exported `state` object, modifies through exported functions.
+// UI reads state via `state` object, modifies through functions.
+// Loaded as a plain script (no ES modules) for maximum compatibility.
 
-export const state = {
+var state = {
   BOARD_SIZE: 20,
   board: [],
   currentPlayer: 0,
@@ -15,7 +16,7 @@ export const state = {
   gameMode: 'cpu',
 };
 
-export function initState(boardSize, gameMode, humanPlayer) {
+function initState(boardSize, gameMode, humanPlayer) {
   state.BOARD_SIZE = boardSize;
   state.board = Array.from({ length: boardSize }, () => Array(boardSize).fill(-1));
   state.currentPlayer = 0;
@@ -37,7 +38,7 @@ export function initState(boardSize, gameMode, humanPlayer) {
   }
 }
 
-export function restoreState(saveData) {
+function restoreState(saveData) {
   state.BOARD_SIZE = saveData.boardSize || 20;
   state.board = saveData.board;
   state.currentPlayer = saveData.currentPlayer;
@@ -60,12 +61,12 @@ export function restoreState(saveData) {
 }
 
 // Legacy compatibility (for setGameState during transition)
-export function setGameState(s) {
+function setGameState(s) {
   Object.assign(state, s);
 }
 
 // ===== Constants =====
-export const PIECE_SHAPES = [
+var PIECE_SHAPES = [
   [[0,0]],
   [[0,0],[1,0]],
   [[0,0],[1,0],[2,0]],
@@ -97,25 +98,25 @@ export const PIECE_SHAPES = [
   [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],
 ];
 
-export const PIECES_14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-export const PIECES_24 = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
+var PIECES_14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+var PIECES_24 = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
 
 // ===== Piece Manipulation =====
-export function rotateCW(shape) {
+function rotateCW(shape) {
   return shape.map(([r, c]) => [c, -r]);
 }
 
-export function flipH(shape) {
+function flipH(shape) {
   return shape.map(([r, c]) => [r, -c]);
 }
 
-export function normalize(shape) {
+function normalize(shape) {
   const minR = Math.min(...shape.map(s => s[0]));
   const minC = Math.min(...shape.map(s => s[1]));
   return shape.map(([r, c]) => [r - minR, c - minC]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 
-export function getAllOrientations(shape) {
+function getAllOrientations(shape) {
   const orientations = [];
   const seen = new Set();
   let s = shape.map(c => [...c]);
@@ -135,7 +136,7 @@ export function getAllOrientations(shape) {
 }
 
 // ===== Placement Validation =====
-export function isFirstMove(player) {
+function isFirstMove(player) {
   const bs = state.BOARD_SIZE;
   for (let r = 0; r < bs; r++)
     for (let c = 0; c < bs; c++)
@@ -143,12 +144,12 @@ export function isFirstMove(player) {
   return true;
 }
 
-export function getStartCorner(player) {
+function getStartCorner(player) {
   const m = state.BOARD_SIZE - 1;
   return [[0,0],[0,m],[m,m],[m,0]][player];
 }
 
-export function canPlace(player, shape, br, bc) {
+function canPlace(player, shape, br, bc) {
   const bs = state.BOARD_SIZE;
   const cells = shape.map(([dr, dc]) => [br + dr, bc + dc]);
 
@@ -182,7 +183,7 @@ export function canPlace(player, shape, br, bc) {
   return false;
 }
 
-export function placePiece(player, shape, br, bc) {
+function placePiece(player, shape, br, bc) {
   state.lastPlacedCells[player] = [];
   shape.forEach(([dr, dc]) => {
     state.board[br + dr][bc + dc] = player;
@@ -191,7 +192,7 @@ export function placePiece(player, shape, br, bc) {
 }
 
 // ===== AI Helpers =====
-export function getCornerPositions(player) {
+function getCornerPositions(player) {
   const bs = state.BOARD_SIZE;
   const corners = [];
   if (isFirstMove(player)) {
@@ -224,7 +225,7 @@ export function getCornerPositions(player) {
   return corners;
 }
 
-export function countNewCorners(player, shape, br, bc) {
+function countNewCorners(player, shape, br, bc) {
   const bs = state.BOARD_SIZE;
   const placed = new Set(shape.map(([dr, dc]) => `${br+dr},${bc+dc}`));
   let count = 0;
@@ -250,7 +251,7 @@ export function countNewCorners(player, shape, br, bc) {
   return count;
 }
 
-export function countBlockedOpponentCorners(player, shape, br, bc) {
+function countBlockedOpponentCorners(player, shape, br, bc) {
   let blocked = 0;
   const placed = new Set(shape.map(([dr, dc]) => `${br+dr},${bc+dc}`));
   for (let p = 0; p < 4; p++) {
@@ -270,7 +271,7 @@ export function countBlockedOpponentCorners(player, shape, br, bc) {
   return blocked;
 }
 
-export function getCenterDistance(shape, br, bc) {
+function getCenterDistance(shape, br, bc) {
   const center = state.BOARD_SIZE / 2;
   let totalDist = 0;
   for (const [dr, dc] of shape) {
@@ -281,7 +282,7 @@ export function getCenterDistance(shape, br, bc) {
 }
 
 // ===== CPU AI =====
-export function cpuMove(player, cpuParams) {
+function cpuMove(player, cpuParams) {
   const pieces = state.playerPieces[player];
   const cornerPositions = getCornerPositions(player);
   if (cornerPositions.length === 0 && !isFirstMove(player)) return null;
@@ -323,7 +324,7 @@ export function cpuMove(player, cpuParams) {
 }
 
 // ===== Scoring =====
-export function getScore(player) {
+function getScore(player) {
   const pieces = state.playerPieces[player];
   const remaining = pieces.filter(p => !p.used).reduce((sum, p) => sum + p.shape.length, 0);
   if (remaining === 0) {
@@ -334,7 +335,7 @@ export function getScore(player) {
 }
 
 // ===== Valid Move Check =====
-export function hasValidMove(player) {
+function hasValidMove(player) {
   const pieces = state.playerPieces[player];
   const corners = getCornerPositions(player);
   if (corners.length === 0 && !isFirstMove(player)) return false;

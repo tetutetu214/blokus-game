@@ -298,8 +298,366 @@ canvas#board { display: block; touch-action: none; }
   </div>
 </div>
 
-<script src="js/game-logic.js"></script>
 <script>
+// ===== game-logic.js (inlined to avoid relative path 404 on custom domain) =====
+var state = {
+  BOARD_SIZE: 20,
+  board: [],
+  currentPlayer: 0,
+  playerPieces: [],
+  passCount: 0,
+  gameOver: false,
+  playerPassed: [false, false, false, false],
+  lastPlacedCells: [[], [], [], []],
+  humanPlayer: 0,
+  gameMode: 'cpu',
+};
+
+function initState(boardSize, gameMode, humanPlayer) {
+  state.BOARD_SIZE = boardSize;
+  state.board = Array.from({ length: boardSize }, () => Array(boardSize).fill(-1));
+  state.currentPlayer = 0;
+  state.passCount = 0;
+  state.gameOver = false;
+  state.playerPassed = [false, false, false, false];
+  state.lastPlacedCells = [[], [], [], []];
+  state.humanPlayer = humanPlayer;
+  state.gameMode = gameMode;
+
+  var activeIdx = (boardSize === 14) ? PIECES_14 : (boardSize === 24) ? PIECES_24 : null;
+  state.playerPieces = [];
+  for (var p = 0; p < 4; p++) {
+    if (activeIdx) {
+      state.playerPieces.push(activeIdx.map(function(i) { return { shape: PIECE_SHAPES[i].map(function(s) { return s.slice(); }), used: false }; }));
+    } else {
+      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map(function(shape) { return { shape: shape.map(function(s) { return s.slice(); }), used: false }; }));
+    }
+  }
+}
+
+function restoreState(saveData) {
+  state.BOARD_SIZE = saveData.boardSize || 20;
+  state.board = saveData.board;
+  state.currentPlayer = saveData.currentPlayer;
+  state.passCount = saveData.passCount;
+  state.gameOver = saveData.gameOver;
+  state.playerPassed = saveData.playerPassed;
+  state.lastPlacedCells = saveData.lastPlacedCells || [[], [], [], []];
+  state.humanPlayer = saveData.humanPlayer !== undefined ? saveData.humanPlayer : 0;
+  state.gameMode = saveData.gameMode;
+
+  var activeIdx = (state.BOARD_SIZE === 14) ? PIECES_14 : (state.BOARD_SIZE === 24) ? PIECES_24 : null;
+  state.playerPieces = [];
+  for (var p = 0; p < 4; p++) {
+    if (activeIdx) {
+      state.playerPieces.push(activeIdx.map(function(si, idx) { return { shape: PIECE_SHAPES[si].map(function(s) { return s.slice(); }), used: saveData.pieceUsed[p][idx] }; }));
+    } else {
+      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map(function(shape, idx) { return { shape: shape.map(function(s) { return s.slice(); }), used: saveData.pieceUsed[p][idx] }; }));
+    }
+  }
+}
+
+function setGameState(s) {
+  Object.assign(state, s);
+}
+
+var PIECE_SHAPES = [
+  [[0,0]],
+  [[0,0],[1,0]],
+  [[0,0],[1,0],[2,0]],
+  [[0,0],[1,0],[1,1]],
+  [[0,0],[1,0],[2,0],[3,0]],
+  [[0,0],[1,0],[2,0],[2,1]],
+  [[0,0],[1,0],[2,0],[1,1]],
+  [[0,0],[1,0],[0,1],[1,1]],
+  [[0,0],[1,0],[1,1],[2,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0]],
+  [[0,0],[1,0],[2,0],[3,0],[3,1]],
+  [[0,0],[1,0],[2,0],[3,0],[2,1]],
+  [[0,0],[0,1],[1,0],[1,1],[2,0]],
+  [[0,0],[1,0],[2,0],[2,1],[3,1]],
+  [[0,0],[1,0],[2,0],[2,1],[2,2]],
+  [[0,0],[1,0],[2,0],[0,1],[2,1]],
+  [[0,0],[1,0],[2,0],[1,1],[1,2]],
+  [[0,0],[1,0],[1,1],[2,1],[2,2]],
+  [[0,0],[1,0],[1,1],[1,2],[2,2]],
+  [[0,0],[1,0],[1,1],[2,1],[1,2]],
+  [[0,1],[1,0],[1,1],[1,2],[2,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[4,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[2,1]],
+  [[0,0],[1,0],[2,0],[2,1],[3,1],[4,1]],
+  [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],
+  [[0,0],[1,0],[2,0],[3,0],[4,0],[1,1]],
+  [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],
+];
+
+var PIECES_14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+var PIECES_24 = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
+
+function rotateCW(shape) {
+  return shape.map(function(s) { return [s[1], -s[0]]; });
+}
+
+function flipH(shape) {
+  return shape.map(function(s) { return [s[0], -s[1]]; });
+}
+
+function normalize(shape) {
+  var minR = Math.min.apply(null, shape.map(function(s) { return s[0]; }));
+  var minC = Math.min.apply(null, shape.map(function(s) { return s[1]; }));
+  return shape.map(function(s) { return [s[0] - minR, s[1] - minC]; }).sort(function(a, b) { return a[0] - b[0] || a[1] - b[1]; });
+}
+
+function getAllOrientations(shape) {
+  var orientations = [];
+  var seen = new Set();
+  var s = shape.map(function(c) { return c.slice(); });
+  for (var flip = 0; flip < 2; flip++) {
+    for (var rot = 0; rot < 4; rot++) {
+      var norm = normalize(s);
+      var key = JSON.stringify(norm);
+      if (!seen.has(key)) {
+        seen.add(key);
+        orientations.push(norm);
+      }
+      s = rotateCW(s);
+    }
+    s = flipH(shape.map(function(c) { return c.slice(); }));
+  }
+  return orientations;
+}
+
+function isFirstMove(player) {
+  var bs = state.BOARD_SIZE;
+  for (var r = 0; r < bs; r++)
+    for (var c = 0; c < bs; c++)
+      if (state.board[r][c] === player) return false;
+  return true;
+}
+
+function getStartCorner(player) {
+  var m = state.BOARD_SIZE - 1;
+  return [[0,0],[0,m],[m,m],[m,0]][player];
+}
+
+function canPlace(player, shape, br, bc) {
+  var bs = state.BOARD_SIZE;
+  var cells = shape.map(function(s) { return [br + s[0], bc + s[1]]; });
+  var i, r, c, ar, ac;
+
+  for (i = 0; i < cells.length; i++) {
+    r = cells[i][0]; c = cells[i][1];
+    if (r < 0 || r >= bs || c < 0 || c >= bs) return false;
+    if (state.board[r][c] >= 0) return false;
+  }
+
+  for (i = 0; i < cells.length; i++) {
+    r = cells[i][0]; c = cells[i][1];
+    var adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+    for (var j = 0; j < adj.length; j++) {
+      ar = adj[j][0]; ac = adj[j][1];
+      if (ar >= 0 && ar < bs && ac >= 0 && ac < bs) {
+        if (state.board[ar][ac] === player) return false;
+      }
+    }
+  }
+
+  if (isFirstMove(player)) {
+    var corner = getStartCorner(player);
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i][0] === corner[0] && cells[i][1] === corner[1]) return true;
+    }
+    return false;
+  }
+
+  for (i = 0; i < cells.length; i++) {
+    r = cells[i][0]; c = cells[i][1];
+    var diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
+    for (var k = 0; k < diag.length; k++) {
+      var dr = diag[k][0], dc = diag[k][1];
+      if (dr >= 0 && dr < bs && dc >= 0 && dc < bs) {
+        if (state.board[dr][dc] === player) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function placePiece(player, shape, br, bc) {
+  state.lastPlacedCells[player] = [];
+  shape.forEach(function(s) {
+    state.board[br + s[0]][bc + s[1]] = player;
+    state.lastPlacedCells[player].push([br + s[0], bc + s[1]]);
+  });
+}
+
+function getCornerPositions(player) {
+  var bs = state.BOARD_SIZE;
+  var corners = [];
+  if (isFirstMove(player)) {
+    corners.push(getStartCorner(player));
+    return corners;
+  }
+  var seen = new Set();
+  for (var r = 0; r < bs; r++) {
+    for (var c = 0; c < bs; c++) {
+      if (state.board[r][c] !== player) continue;
+      var diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
+      for (var d = 0; d < diag.length; d++) {
+        var dr = diag[d][0], dc = diag[d][1];
+        if (dr < 0 || dr >= bs || dc < 0 || dc >= bs) continue;
+        if (state.board[dr][dc] >= 0) continue;
+        var key = dr + ',' + dc;
+        if (seen.has(key)) continue;
+        var adj = [[dr-1,dc],[dr+1,dc],[dr,dc-1],[dr,dc+1]];
+        var blocked = false;
+        for (var a = 0; a < adj.length; a++) {
+          if (adj[a][0] >= 0 && adj[a][0] < bs && adj[a][1] >= 0 && adj[a][1] < bs && state.board[adj[a][0]][adj[a][1]] === player) {
+            blocked = true; break;
+          }
+        }
+        if (!blocked) { seen.add(key); corners.push([dr, dc]); }
+      }
+    }
+  }
+  return corners;
+}
+
+function countNewCorners(player, shape, br, bc) {
+  var bs = state.BOARD_SIZE;
+  var placed = new Set(shape.map(function(s) { return (br+s[0])+','+(bc+s[1]); }));
+  var count = 0;
+  for (var i = 0; i < shape.length; i++) {
+    var r = br + shape[i][0], c = bc + shape[i][1];
+    var diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
+    for (var d = 0; d < diag.length; d++) {
+      var cr = diag[d][0], cc = diag[d][1];
+      if (cr < 0 || cr >= bs || cc < 0 || cc >= bs) continue;
+      if (state.board[cr][cc] >= 0) continue;
+      if (placed.has(cr+','+cc)) continue;
+      var edgeBlocked = false;
+      var adj = [[cr-1,cc],[cr+1,cc],[cr,cc-1],[cr,cc+1]];
+      for (var a = 0; a < adj.length; a++) {
+        if (placed.has(adj[a][0]+','+adj[a][1])) { edgeBlocked = true; break; }
+        if (adj[a][0] >= 0 && adj[a][0] < bs && adj[a][1] >= 0 && adj[a][1] < bs && state.board[adj[a][0]][adj[a][1]] === player) {
+          edgeBlocked = true; break;
+        }
+      }
+      if (!edgeBlocked) count++;
+    }
+  }
+  return count;
+}
+
+function countBlockedOpponentCorners(player, shape, br, bc) {
+  var blocked = 0;
+  var placed = new Set(shape.map(function(s) { return (br+s[0])+','+(bc+s[1]); }));
+  for (var p = 0; p < 4; p++) {
+    if (p === player) continue;
+    var oppCorners = getCornerPositions(p);
+    for (var i = 0; i < oppCorners.length; i++) {
+      var cr = oppCorners[i][0], cc = oppCorners[i][1];
+      if (placed.has(cr+','+cc)) blocked++;
+      for (var j = 0; j < shape.length; j++) {
+        var r = br + shape[j][0], c = bc + shape[j][1];
+        if ((Math.abs(r-cr) === 1 && c === cc) || (Math.abs(c-cc) === 1 && r === cr)) {
+          blocked++;
+          break;
+        }
+      }
+    }
+  }
+  return blocked;
+}
+
+function getCenterDistance(shape, br, bc) {
+  var center = state.BOARD_SIZE / 2;
+  var totalDist = 0;
+  for (var i = 0; i < shape.length; i++) {
+    var r = br + shape[i][0], c = bc + shape[i][1];
+    totalDist += Math.abs(r - center) + Math.abs(c - center);
+  }
+  return totalDist / shape.length;
+}
+
+function cpuMove(player, cpuParams) {
+  var pieces = state.playerPieces[player];
+  var cornerPositions = getCornerPositions(player);
+  if (cornerPositions.length === 0 && !isFirstMove(player)) return null;
+
+  var pw = cpuParams;
+  var bestMove = null;
+  var bestScore = -Infinity;
+
+  var pieceIndices = [];
+  for (var i = 0; i < pieces.length; i++) { if (!pieces[i].used) pieceIndices.push(i); }
+  pieceIndices.sort(function(a, b) { return pieces[b].shape.length - pieces[a].shape.length; });
+
+  for (var pi = 0; pi < pieceIndices.length; pi++) {
+    var idx = pieceIndices[pi];
+    var orientations = getAllOrientations(pieces[idx].shape);
+    var positions = isFirstMove(player) ? [getStartCorner(player)] : cornerPositions;
+
+    for (var oi = 0; oi < orientations.length; oi++) {
+      var orient = orientations[oi];
+      for (var ci = 0; ci < positions.length; ci++) {
+        for (var di = 0; di < orient.length; di++) {
+          var br = positions[ci][0] - orient[di][0];
+          var bc = positions[ci][1] - orient[di][1];
+          if (canPlace(player, orient, br, bc)) {
+            var sizeScore = orient.length * pw.sizeWeight;
+            var cornerScore = countNewCorners(player, orient, br, bc) * pw.cornerWeight;
+            var centerScore = (state.BOARD_SIZE - getCenterDistance(orient, br, bc)) * pw.centerWeight;
+            var blockScore = countBlockedOpponentCorners(player, orient, br, bc) * pw.blockWeight;
+            var randomScore = (Math.random() - 0.5) * pw.randomness * 10;
+            var total = sizeScore + cornerScore + centerScore + blockScore + randomScore;
+            if (total > bestScore) {
+              bestScore = total;
+              bestMove = { idx: idx, shape: orient, br: br, bc: bc };
+            }
+          }
+        }
+      }
+    }
+  }
+  return bestMove;
+}
+
+function getScore(player) {
+  var pieces = state.playerPieces[player];
+  var remaining = 0;
+  for (var i = 0; i < pieces.length; i++) {
+    if (!pieces[i].used) remaining += pieces[i].shape.length;
+  }
+  if (remaining === 0) {
+    return pieces[pieces.length - 1].shape.length === 1 ? 20 : 15;
+  }
+  return -remaining;
+}
+
+function hasValidMove(player) {
+  var pieces = state.playerPieces[player];
+  var corners = getCornerPositions(player);
+  if (corners.length === 0 && !isFirstMove(player)) return false;
+  var positions = isFirstMove(player) ? [getStartCorner(player)] : corners;
+
+  for (var idx = 0; idx < pieces.length; idx++) {
+    if (pieces[idx].used) continue;
+    var orientations = getAllOrientations(pieces[idx].shape);
+    for (var oi = 0; oi < orientations.length; oi++) {
+      for (var ci = 0; ci < positions.length; ci++) {
+        for (var di = 0; di < orientations[oi].length; di++) {
+          var br = positions[ci][0] - orientations[oi][di][0];
+          var bc = positions[ci][1] - orientations[oi][di][1];
+          if (canPlace(player, orientations[oi], br, bc)) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+// ===== End game-logic =====
 
 // ===== Constants =====
 // state.BOARD_SIZE is now in state (game-logic.js)

@@ -197,11 +197,13 @@ canvas#board { display: block; touch-action: none; }
 #tutorial-box .tutorial-diagram { background: #0a0a1a; border: 1px solid #333; border-radius: 4px; padding: 8px; margin: 8px 0; text-align: center; font-family: monospace; font-size: 14px; line-height: 1.4; }
 #tutorial-box .ok-label { color: #00c896; font-weight: bold; }
 #tutorial-box .ng-label { color: #e94560; font-weight: bold; }
+#tutorial-box .ja { font-size: 12px; color: #999; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin-top: 2px; }
 #tutorial-next-btn { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #00c896; color: #00c896; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif; transition: all 0.2s; }
 #tutorial-next-btn:hover { background: rgba(0,200,150,0.15); box-shadow: 0 0 20px rgba(0,200,150,0.3); }
 #tutorial-hint { display: none; position: fixed; bottom: 200px; left: 50%; transform: translateX(-50%); background: rgba(0,200,150,0.9); color: #000; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; z-index: 310; text-align: center; max-width: 320px; box-shadow: 0 0 20px rgba(0,200,150,0.4); }
 #tutorial-hint.show { display: block; }
 #tutorial-hint.error { background: rgba(233,69,96,0.9); }
+#tutorial-hint .hint-ja { font-size: 11px; opacity: 0.85; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -1718,31 +1720,36 @@ const TUTORIAL_STEPS = [
   // Step 0: Welcome + game objective (①)
   {
     type: 'overlay',
-    title: 'KADOへようこそ！',
+    title: 'WELCOME TO KADO',
     content: `
-      <h3>ゲームの目的</h3>
-      <p>できるだけ多く、自分のピースを盤面に配置しましょう。</p>
-      <p>最後に残ったピースの合計数が<b>少ない人</b>が勝利となります。</p>
+      <h3>OBJECTIVE</h3>
+      <p>Place as many of your pieces on the board as possible.</p>
+      <p class="ja">できるだけ多く、自分のピースを盤面に配置しましょう。</p>
+      <p>The player with the <b>fewest remaining squares</b> wins.</p>
+      <p class="ja">最後に残ったピースの合計数が<b>少ない人</b>が勝利となります。</p>
     `
   },
   // Step 1: Basic rules - corner start (②)
   {
     type: 'overlay',
-    title: '配置ルール',
+    title: 'PLACEMENT RULES',
     content: `
-      <h3>スタートはコーナーから</h3>
-      <p>最初は盤面の隅（★マーク）を埋めるようにピースを1つ置いてゲームを始めます。</p>
-      <h3>角と角はつながるように</h3>
-      <p>2つめ以降は、自分のピースの<b>角と角がつながる</b>ように置きます。</p>
+      <h3>Start from a Corner</h3>
+      <p>Place your first piece on the corner of the board (★ mark).</p>
+      <p class="ja">最初は盤面の隅（★マーク）を埋めるようにピースを1つ置いてゲームを始めます。</p>
+      <h3>Connect Corner-to-Corner</h3>
+      <p>From the 2nd piece onward, place so your pieces touch <b>corner-to-corner</b>.</p>
+      <p class="ja">2つめ以降は、自分のピースの<b>角と角がつながる</b>ように置きます。</p>
       <div class="tutorial-diagram">
-        <span class="ok-label">OK: 角で接続</span><br>
+        <span class="ok-label">OK: Corner connection</span><br>
         ■ □<br>
         □ ■
       </div>
-      <h3>同じ色の辺は接触NG</h3>
-      <p>同じ色のピースは<b>辺をくっつけて置くことはできません</b>。</p>
+      <h3>No Edge Contact</h3>
+      <p>Your pieces must <b>never share an edge</b>.</p>
+      <p class="ja">同じ色のピースは<b>辺をくっつけて置くことはできません</b>。</p>
       <div class="tutorial-diagram">
-        <span class="ng-label">NG: 辺で接触</span><br>
+        <span class="ng-label">NG: Edge contact</span><br>
         ■<br>
         ■
       </div>
@@ -1751,77 +1758,84 @@ const TUTORIAL_STEPS = [
   // Step 2: Opponent pieces (③)
   {
     type: 'overlay',
-    title: '相手のピースとの関係',
+    title: 'OPPONENT PIECES',
     content: `
-      <p>色の違うピースは、他の色のピースの<b>辺に接してもかまいません</b>。</p>
-      <p>制限があるのは<b>自分のピースだけ</b>です。</p>
+      <p>Touching other players' edges is <b>OK</b>.</p>
+      <p class="ja">色の違うピースは、他の色のピースの<b>辺に接してもかまいません</b>。</p>
+      <p>The restriction only applies to <b>your own pieces</b>.</p>
+      <p class="ja">制限があるのは<b>自分のピースだけ</b>です。</p>
     `
   },
   // Step 3: Controls explanation
   {
     type: 'overlay',
-    title: '操作方法',
+    title: 'CONTROLS',
     content: `
       <ul>
-        <li>画面下のパネルから<b>ピースを選択</b></li>
-        <li><b>↻</b> 回転 / <b>↔</b> 反転 で向きを変更</li>
-        <li>ボードをタップして配置</li>
-        <li><b>●ドット</b>が置ける場所を示します</li>
+        <li>Select a piece from the <b>panel below</b></li>
+        <li><b>↻</b> Rotate / <b>↔</b> Flip to change orientation</li>
+        <li>Tap the board to place</li>
+        <li><b>● Dots</b> show valid positions</li>
       </ul>
+      <p class="ja">パネルからピースを選択 → ↻回転 / ↔反転 → ボードをタップして配置。●ドットが置ける場所です。</p>
     `
   },
   // Step 4: Place first piece on star (④-a)
   {
     type: 'action',
-    hint: '★マークにピースを置いてみましょう！\n下のパネルからピースを選んでタップ'
+    hint: 'Place a piece on the ★ mark!\nSelect a piece from the panel and tap the board.\n★マークにピースを置いてみましょう！'
   },
   // Step 5: First piece placed! Now explain next placement
   {
     type: 'overlay',
-    title: '最初のピースを置けました！',
+    title: 'PIECE PLACED!',
     content: `
-      <p>次は<b>角と角をつなげていく</b>体験をしましょう。</p>
-      <p>盤面の <b>●ドット</b> が置ける場所を示しています。</p>
-      <p>まずは、わざと辺に接する位置に置いてみてください。<br>（置けないことを確認できます）</p>
+      <p>Now let's try <b>connecting corner-to-corner</b>.</p>
+      <p class="ja">次は<b>角と角をつなげていく</b>体験をしましょう。</p>
+      <p>The <b>● dots</b> on the board show valid positions.</p>
+      <p>Try placing on an edge first — you'll see it won't work!</p>
+      <p class="ja">まずは辺に接する位置に置いてみてください（置けないことを確認できます）。</p>
     `
   },
   // Step 6: Try edge NG and then place corner OK (④-b, ④-c)
   {
     type: 'action',
-    hint: 'ピースを選んで盤面に置いてみましょう\n辺に接する位置→置けない / 角に接する位置→置ける'
+    hint: 'Select a piece and try placing it.\nEdge = blocked / Corner = OK!\nピースを選んで置いてみましょう。'
   },
   // Step 7: Scoring
   {
     type: 'overlay',
-    title: 'スコア',
+    title: 'SCORING',
     content: `
-      <p><b>勝利条件</b>：残ったピースのマス目が一番少ない人が、ゲームの勝者です。</p>
+      <p><b>Win condition</b>: The player with the fewest remaining squares wins.</p>
+      <p class="ja"><b>勝利条件</b>：残ったピースのマス目が一番少ない人が、ゲームの勝者です。</p>
       <ul>
-        <li>残ったピースのマス数 × <b>-1点</b></li>
-        <li>全ピース配置で <b>+15ボーナス！</b></li>
+        <li>Remaining squares × <b>-1 point</b></li>
+        <li>All pieces placed = <b>+15 bonus!</b></li>
       </ul>
     `
   },
   // Step 8: Strategy hints (⑤)
   {
     type: 'overlay',
-    title: '戦略のヒント',
+    title: 'STRATEGY TIPS',
     content: `
       <ul>
-        <li><b>盤面の中央へ早めに進出</b>しましょう。端に追い詰められると置ける場所がなくなります。</li>
-        <li><b>大きいピースは早めに使う</b>のがコツ。終盤は小さいピースしか入らなくなります。</li>
+        <li><b>Expand toward the center</b> early. Getting stuck on the edge limits your options.</li>
+        <li><b>Use large pieces first</b>. Only small pieces will fit in the late game.</li>
       </ul>
+      <p class="ja">盤面の中央へ早めに進出し、大きいピースは早めに使いましょう。</p>
     `
   },
   // Step 9: Tutorial complete
   {
     type: 'overlay',
-    title: 'チュートリアル完了！',
+    title: 'TUTORIAL COMPLETE!',
     content: `
-      <p>これでKADOの基本はバッチリです。</p>
-      <p>実際の対戦で腕を磨きましょう！</p>
+      <p>You're ready to play KADO!</p>
+      <p class="ja">これでKADOの基本はバッチリです。実戦で腕を磨きましょう！</p>
     `,
-    buttonText: 'タイトルに戻る'
+    buttonText: 'BACK TO TITLE'
   }
 ];
 
@@ -1935,12 +1949,12 @@ function onTutorialPlacementFailed() {
   if (step && step.type === 'action' && tutorialStep === 6) {
     tutorialEdgeNgCount++;
     const hint = document.getElementById('tutorial-hint');
-    hint.textContent = '辺で接する位置には置けません！\n角（ななめ）で接する位置に置きましょう';
+    hint.innerHTML = 'Edge contact is not allowed!<div class="hint-ja">辺で接する位置には置けません！角で接する位置に置きましょう</div>';
     hint.className = 'show error';
     setTimeout(() => {
       if (tutorialActive && tutorialStep === 6) {
         hint.className = 'show';
-        hint.textContent = '●ドットの位置に、角で接するように置きましょう';
+        hint.innerHTML = 'Place on a ● dot — connect corner-to-corner.<div class="hint-ja">●ドットの位置に、角で接するように置きましょう</div>';
       }
     }, 2500);
   }
@@ -2014,7 +2028,7 @@ function setupEventListeners() {
 
   // Tutorial overlay
   document.getElementById('tutorial-next-btn').addEventListener('click', function() {
-    if (tutorialActive && TUTORIAL_STEPS[tutorialStep] && TUTORIAL_STEPS[tutorialStep].buttonText === 'タイトルに戻る') {
+    if (tutorialActive && TUTORIAL_STEPS[tutorialStep] && TUTORIAL_STEPS[tutorialStep].buttonText === 'BACK TO TITLE') {
       endTutorial();
     } else {
       advanceTutorial();

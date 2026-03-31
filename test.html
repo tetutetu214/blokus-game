@@ -102,14 +102,17 @@ function placePiece(board, player, shape, br, bc) {
   });
 }
 
-function getScore(playerPieces, player) {
+function getScore(playerPieces, player, lastPlacedCells) {
   const pieces = playerPieces[player];
   let total = 0;
   pieces.forEach(p => {
     if (!p.used) total -= p.shape.length;
   });
   const allUsed = pieces.every(p => p.used);
-  if (allUsed) total += 15;
+  if (allUsed) {
+    const lastCells = lastPlacedCells && lastPlacedCells[player];
+    total += (lastCells && lastCells.length === 1) ? 20 : 15;
+  }
   return total;
 }
 
@@ -321,20 +324,26 @@ section('getScore (スコア計算)');
     [[0,1],[1,0],[1,1],[1,2],[2,1]],
   ];
 
+  const lpc = [[], [], [], []];
   const pp = [PIECE_SHAPES.map(s => ({ shape: s.map(c => [...c]), used: false }))];
-  assert('全ピース未使用 → -89点', getScore(pp, 0) === -89);
+  assert('全ピース未使用 → -89点', getScore(pp, 0, lpc) === -89);
 
-  // 全ピース使用済み
+  // 全ピース使用済み（最後が複数マスピース）
   const ppAll = [PIECE_SHAPES.map(s => ({ shape: s.map(c => [...c]), used: true }))];
-  assert('全ピース使用済み → +15点 (ボーナス)', getScore(ppAll, 0) === 15);
+  const lpcMulti = [[[0,0],[1,0]], [], [], []];
+  assert('全ピース使用済み(最後>1マス) → +15点', getScore(ppAll, 0, lpcMulti) === 15);
+
+  // 全ピース使用済み（最後が1マスピース）
+  const lpcSingle = [[[0,0]], [], [], []];
+  assert('全ピース使用済み(最後1マス) → +20点', getScore(ppAll, 0, lpcSingle) === 20);
 
   // 一部使用（1マスと2マスのみ使用、残り86マス未使用）
   const ppPartial = [PIECE_SHAPES.map((s, i) => ({ shape: s.map(c => [...c]), used: i < 2 }))];
-  assert('1マス+2マスのみ使用 → -86点', getScore(ppPartial, 0) === -86);
+  assert('1マス+2マスのみ使用 → -86点', getScore(ppPartial, 0, lpc) === -86);
 
   // 最後の1ピース（1マス）だけ未使用
   const ppAlmost = [PIECE_SHAPES.map((s, i) => ({ shape: s.map(c => [...c]), used: i > 0 }))];
-  assert('1マスピースだけ未使用 → -1点', getScore(ppAlmost, 0) === -1);
+  assert('1マスピースだけ未使用 → -1点', getScore(ppAlmost, 0, lpc) === -1);
 }
 
 // --- 回転＋配置の統合テスト ---

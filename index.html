@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9K5QFZDJ6Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9K5QFZDJ6Y');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -174,9 +182,20 @@ canvas#board { display: block; touch-action: none; }
 #auto-pass-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; z-index: 60; text-align: center; animation: fadeInOut 2s ease-in-out; pointer-events: none; }
 #auto-pass-toast .pass-name { font-weight: bold; font-size: 17px; }
 @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#battle-menu, #puzzle-menu { flex-direction: column; align-items: center; gap: 16px; }
+#battle-menu h2, #puzzle-menu h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
+#battle-menu p, #puzzle-menu p { color: #888; font-size: 12px; margin-bottom: 4px; }
 #board-size-screen { flex-direction: column; align-items: center; gap: 8px; }
 #board-size-screen h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
 #board-size-screen p { color: #888; font-size: 12px; margin-bottom: 4px; }
+#round-select { flex-direction: column; align-items: center; gap: 8px; }
+#round-select h2 { font-family: 'Press Start 2P', monospace; font-size: 16px; letter-spacing: 2px; }
+#round-select p { color: #888; font-size: 12px; margin-bottom: 4px; }
+#round-indicator { display: none; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #e94560; margin-left: 8px; }
+#round-indicator.show { display: inline; }
+#series-scores { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+#series-scores h3 { font-size: 12px; color: #e94560; margin-bottom: 6px; text-align: center; }
+.series-score-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 13px; }
 
 /* Tutorial overlay */
 #tutorial-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 300; justify-content: center; align-items: center; }
@@ -196,6 +215,18 @@ canvas#board { display: block; touch-action: none; }
 #tutorial-hint.show { display: block; }
 #tutorial-hint.error { background: rgba(180,40,60,0.95); }
 #tutorial-hint .hint-ja { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+
+/* Puzzle intro overlay */
+#puzzle-intro-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 300; justify-content: center; align-items: center; }
+#puzzle-intro-overlay.show { display: flex; }
+#puzzle-intro-box { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 8px; padding: 24px; max-width: 480px; width: 92%; max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
+#puzzle-intro-box h2 { text-align: center; font-size: 18px; color: #e94560; margin-bottom: 12px; text-shadow: 0 0 10px rgba(233,69,96,0.4); }
+#puzzle-intro-box h3 { font-size: 14px; color: #e94560; margin: 10px 0 4px; }
+#puzzle-intro-box p, #puzzle-intro-box li { font-size: 13px; line-height: 1.6; color: #ccc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+#puzzle-intro-box ul { padding-left: 18px; margin: 4px 0; }
+#puzzle-intro-box .ja { font-size: 12px; color: #999; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin-top: 2px; }
+#puzzle-intro-start-btn { display: block; margin: 16px auto 0; background: transparent; border: 1px solid #e94560; color: #e94560; padding: 10px 28px; border-radius: 4px; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif; transition: all 0.2s; }
+#puzzle-intro-start-btn:hover { background: rgba(233,69,96,0.15); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
 </style>
 </head>
 <body>
@@ -209,13 +240,13 @@ canvas#board { display: block; touch-action: none; }
       CONTINUE
       <span class="sub">Resume saved game</span>
     </button>
-    <button id="btn-vs-cpu" class="start-btn">
-      1P vs CPU
-      <span class="sub">Play against AI</span>
+    <button id="btn-battle" class="start-btn">
+      BATTLE
+      <span class="sub">1P vs CPU / Local multiplayer</span>
     </button>
-    <button id="btn-local-4p" class="start-btn">
-      LOCAL 4P
-      <span class="sub">Pass & Play</span>
+    <button id="btn-puzzle-menu" class="start-btn">
+      PUZZLE
+      <span class="sub">Solo challenge modes</span>
     </button>
     <button id="btn-puzzle" class="start-btn" onclick="location.href='puzzle/'">
       PUZZLE
@@ -234,6 +265,32 @@ canvas#board { display: block; touch-action: none; }
       <span class="sub">Bug reports & requests</span>
     </button>
     <a class="feedback-link" href="https://tetutetu214.com/game/kado/legal">特定商取引法に基づく表記</a>
+  </div>
+  <div id="battle-menu" style="display:none;">
+    <h2>BATTLE</h2>
+    <p>Select battle mode</p>
+    <button id="btn-vs-cpu" class="start-btn">
+      1P vs CPU
+      <span class="sub">Play against AI</span>
+    </button>
+    <button id="btn-local-4p" class="start-btn">
+      LOCAL 4P
+      <span class="sub">Pass & Play</span>
+    </button>
+    <button id="btn-continuous" class="start-btn">
+      CONTINUOUS BATTLE
+      <span class="sub">Best of 3 / 5 / 10</span>
+    </button>
+    <button id="btn-battle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
+  <div id="puzzle-menu" style="display:none;">
+    <h2>PUZZLE</h2>
+    <p>Challenge yourself</p>
+    <button id="btn-puzzle" class="start-btn">
+      PERFECT PLACE
+      <span class="sub">Place all pieces on the board</span>
+    </button>
+    <button id="btn-puzzle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
   </div>
   <div id="board-size-screen" style="display:none;">
     <h2>SELECT BOARD SIZE</h2>
@@ -271,6 +328,23 @@ canvas#board { display: block; touch-action: none; }
       <button class="order-btn" id="char-start-btn" style="background:transparent;border:1px solid #e94560;color:#e94560;width:auto;padding:10px 20px;display:none;">START!</button>
     </div>
   </div>
+  <div id="round-select" style="display:none;">
+    <h2>ROUNDS</h2>
+    <p>How many rounds?</p>
+    <button id="btn-round-3" class="start-btn">
+      3 ROUNDS
+      <span class="sub">Quick series</span>
+    </button>
+    <button id="btn-round-5" class="start-btn">
+      5 ROUNDS
+      <span class="sub">Standard series</span>
+    </button>
+    <button id="btn-round-10" class="start-btn">
+      10 ROUNDS
+      <span class="sub">Full series</span>
+    </button>
+    <button id="btn-round-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
 </div>
 
 <!-- 特定商取引法モーダル -->
@@ -279,7 +353,9 @@ canvas#board { display: block; touch-action: none; }
 <div id="app" style="display:none;">
   <div id="header">
     <h1>KADO</h1>
+    <span id="board-size-label" style="display:none;font-size:10px;color:#888;font-family:'Orbitron',sans-serif;"></span>
     <span id="turn-indicator">● P1</span>
+    <span id="round-indicator"></span>
     <button id="score-btn">SCORE</button>
   </div>
   <div id="stats-bar"></div>
@@ -331,6 +407,13 @@ const PLAYERS_LOCAL = [
   { id: 1, name: 'P2', color: '#F0E442', light: '#f5ed7a' },
   { id: 2, name: 'P3', color: '#9467BD', light: '#b394d4' },
   { id: 3, name: 'P4', color: '#D55E00', light: '#e8885a' }
+];
+
+const PLAYERS_PUZZLE = [
+  { id: 0, name: 'BLUE', color: '#0072B2', light: '#4da6d9' },
+  { id: 1, name: 'YELLOW', color: '#F0E442', light: '#f5ed7a' },
+  { id: 2, name: 'PURPLE', color: '#9467BD', light: '#b394d4' },
+  { id: 3, name: 'ORANGE', color: '#D55E00', light: '#e8885a' }
 ];
 
 // CPU Character System (9 characters, Rank 1-9)
@@ -1110,22 +1193,48 @@ function showScores() {
   body.innerHTML = '';
   const div = document.createElement('div');
   div.className = 'scores';
-  // Sort players by score descending for ranking
-  const ranked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
-  ranked.sort((a, b) => b.score - a.score);
-  ranked.forEach((r, pos) => {
-    const row = document.createElement('div');
-    row.className = 'score-row';
-    const isMe = (state.gameMode === 'cpu' && r.idx === state.humanPlayer);
-    const rankLabel = '#' + (pos + 1);
-    const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
-    const scoreHtml = `<span>${r.score}pts</span>`;
-    row.innerHTML = nameHtml + scoreHtml;
-    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
-    div.appendChild(row);
-  });
-  body.appendChild(div);
-  document.getElementById('modal-title').textContent = 'SCORE';
+
+  if (state.gameMode === 'puzzle') {
+    // Puzzle mode: show remaining pieces per color
+    players.forEach((p, i) => {
+      const pieces = state.playerPieces[i];
+      const remaining = pieces.filter(pc => !pc.used);
+      const remainingCells = remaining.reduce((sum, pc) => sum + pc.shape.length, 0);
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      const nameHtml = `<span style="color:${p.color}">${p.name}</span>`;
+      const statusHtml = remaining.length === 0
+        ? '<span style="color:#00c896;">ALL PLACED</span>'
+        : `<span>${remaining.length}pcs / ${remainingCells}sq left</span>`;
+      row.innerHTML = nameHtml + statusHtml;
+      div.appendChild(row);
+    });
+    body.appendChild(div);
+    const totalPieces = state.playerPieces.reduce((sum, pp) => sum + pp.length, 0);
+    const placedPieces = state.playerPieces.reduce((sum, pp) => sum + pp.filter(p => p.used).length, 0);
+    const totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'margin-top:12px;font-size:14px;color:#aaa;';
+    totalDiv.textContent = placedPieces + ' / ' + totalPieces + ' pieces placed';
+    body.appendChild(totalDiv);
+  } else {
+    // Sort players by score descending for ranking
+    const ranked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
+    ranked.sort((a, b) => b.score - a.score);
+    ranked.forEach((r, pos) => {
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      const isMe = (state.gameMode === 'cpu' && r.idx === state.humanPlayer);
+      const rankLabel = '#' + (pos + 1);
+      const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
+      const scoreHtml = `<span>${r.score}pts</span>`;
+      row.innerHTML = nameHtml + scoreHtml;
+      if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+      div.appendChild(row);
+    });
+    body.appendChild(div);
+  }
+
+  document.getElementById('modal-title').textContent = state.gameMode === 'puzzle' ? 'PROGRESS' : 'SCORE';
   document.getElementById('modal-close-btn').style.display = state.gameOver ? 'none' : '';
   document.getElementById('restart-btn').style.display = state.gameOver ? 'inline-block' : 'none';
   document.getElementById('modal-overlay').classList.add('show');
@@ -1138,6 +1247,80 @@ function closeModal() {
 
 function endGame() {
   state.gameOver = true;
+
+  // Puzzle mode result
+  if (state.gameMode === 'puzzle') {
+    // Puzzle mode: check if all pieces were placed
+    const allPlaced = state.playerPieces.every(pp => pp.every(p => p.used));
+    const title = allPlaced ? 'PUZZLE CLEAR!' : 'PUZZLE FAILED';
+
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-close-btn').style.display = 'none';
+    document.getElementById('restart-btn').style.display = 'inline-block';
+
+    const body = document.getElementById('modal-body');
+    body.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'scores';
+
+    // Show each color's remaining pieces
+    players.forEach((p, i) => {
+      const remaining = state.playerPieces[i].filter(pc => !pc.used);
+      const remainingCells = remaining.reduce((sum, pc) => sum + pc.shape.length, 0);
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      const nameHtml = `<span style="color:${p.color}">${p.name}</span>`;
+      const statusHtml = remaining.length === 0
+        ? '<span style="color:#00c896;">ALL PLACED</span>'
+        : `<span>${remaining.length}pcs / ${remainingCells}sq left</span>`;
+      row.innerHTML = nameHtml + statusHtml;
+      div.appendChild(row);
+    });
+    body.appendChild(div);
+
+    // Total placed stats
+    const totalPieces = state.playerPieces.reduce((sum, pp) => sum + pp.length, 0);
+    const placedPieces = state.playerPieces.reduce((sum, pp) => sum + pp.filter(p => p.used).length, 0);
+    const totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'margin-top:12px;font-size:14px;color:#aaa;';
+    totalDiv.textContent = placedPieces + ' / ' + totalPieces + ' pieces placed';
+    body.appendChild(totalDiv);
+
+    if (allPlaced) {
+      var nr = document.createElement('div');
+      nr.className = 'new-record';
+      nr.textContent = 'PERFECT';
+      body.appendChild(nr);
+    }
+
+    document.getElementById('modal-overlay').classList.add('show');
+    return;
+  }
+
+  // Accumulate scores for continuous mode
+  if (continuousMode) {
+    players.forEach((p, i) => {
+      seriesScores[i] += getScore(i);
+    });
+  }
+
+  // Check if this is a mid-series round
+  if (continuousMode && currentRound < totalRounds) {
+    showRoundResult();
+    return;
+  }
+
+  // Final result (single game or last round of series)
+  if (continuousMode) {
+    showSeriesFinalResult();
+    return;
+  }
+
+  // Standard single-game result
+  showSingleGameResult();
+}
+
+function showSingleGameResult() {
   let best = -999, winner = 0;
   players.forEach((p, i) => {
     const s = getScore(i);
@@ -1184,6 +1367,116 @@ function endGame() {
   document.getElementById('modal-overlay').classList.add('show');
 }
 
+function showRoundResult() {
+  document.getElementById('modal-title').textContent = 'ROUND ' + currentRound + ' COMPLETE';
+  document.getElementById('modal-close-btn').style.display = 'none';
+  document.getElementById('restart-btn').style.display = 'none';
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+
+  // This round's scores
+  const div = document.createElement('div');
+  div.className = 'scores';
+  const ranked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
+  ranked.sort((a, b) => b.score - a.score);
+  ranked.forEach((r, pos) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    const rankLabel = '#' + (pos + 1);
+    const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
+    const scoreHtml = `<span>${r.score}pts</span>`;
+    row.innerHTML = nameHtml + scoreHtml;
+    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+    div.appendChild(row);
+  });
+  body.appendChild(div);
+
+  // Cumulative series scores
+  const seriesDiv = document.createElement('div');
+  seriesDiv.id = 'series-scores';
+  seriesDiv.innerHTML = '<h3>TOTAL (' + currentRound + '/' + totalRounds + ')</h3>';
+  const seriesRanked = players.map((p, i) => ({ player: p, idx: i, score: seriesScores[i] }));
+  seriesRanked.sort((a, b) => b.score - a.score);
+  seriesRanked.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'series-score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    row.innerHTML = `<span style="color:${r.player.color}">${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.fontWeight = 'bold';
+    seriesDiv.appendChild(row);
+  });
+  body.appendChild(seriesDiv);
+
+  // Next round button
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'start-btn';
+  nextBtn.style.cssText = 'margin-top:16px;width:100%;';
+  nextBtn.textContent = 'NEXT ROUND';
+  nextBtn.addEventListener('click', startNextRound);
+  body.appendChild(nextBtn);
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function startNextRound() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  currentRound++;
+  updateRoundIndicator();
+  initGame();
+}
+
+function showSeriesFinalResult() {
+  let best = -999, winner = 0;
+  seriesScores.forEach((s, i) => {
+    if (s > best) { best = s; winner = i; }
+  });
+
+  const title = winner === state.humanPlayer ? 'YOU WIN THE SERIES!' : players[winner].name + ' WINS THE SERIES!';
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-close-btn').style.display = 'none';
+  document.getElementById('restart-btn').style.display = 'inline-block';
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+
+  // Final round scores
+  const roundDiv = document.createElement('div');
+  roundDiv.className = 'scores';
+  const roundRanked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
+  roundRanked.sort((a, b) => b.score - a.score);
+  roundRanked.forEach((r, pos) => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    const rankLabel = '#' + (pos + 1);
+    row.innerHTML = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+    roundDiv.appendChild(row);
+  });
+  body.appendChild(roundDiv);
+
+  // Final cumulative scores
+  const seriesDiv = document.createElement('div');
+  seriesDiv.id = 'series-scores';
+  seriesDiv.innerHTML = '<h3>FINAL TOTAL</h3>';
+  const seriesRanked = players.map((p, i) => ({ player: p, idx: i, score: seriesScores[i] }));
+  seriesRanked.sort((a, b) => b.score - a.score);
+  seriesRanked.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'series-score-row';
+    const isMe = (r.idx === state.humanPlayer);
+    row.innerHTML = `<span style="color:${r.player.color}">${r.player.name}</span><span>${r.score}pts</span>`;
+    if (isMe) row.style.fontWeight = 'bold';
+    seriesDiv.appendChild(row);
+  });
+  body.appendChild(seriesDiv);
+
+  document.getElementById('modal-overlay').classList.add('show');
+  resetContinuousState();
+}
+
 // ===== Save / Load =====
 function saveGame() {
   try {
@@ -1198,7 +1491,12 @@ function saveGame() {
       pieceUsed: state.playerPieces.map(pp => pp.map(p => p.used)),
       cpuCharacterIds: cpuCharacters.map(c => c ? c.id : null),
       boardSize: state.BOARD_SIZE,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      // Continuous battle state
+      continuousMode: continuousMode,
+      totalRounds: totalRounds,
+      currentRound: currentRound,
+      seriesScores: seriesScores
     };
     localStorage.setItem('kado_save', JSON.stringify(saveData));
   } catch(e) {
@@ -1254,16 +1552,35 @@ function resumeGame() {
         cpuIdx++;
       }
     }
+  } else if (state.gameMode === 'puzzle') {
+    players = PLAYERS_PUZZLE;
   } else {
     players = PLAYERS_LOCAL;
   }
 
+  // Restore continuous battle state
+  if (save.continuousMode) {
+    continuousMode = true;
+    totalRounds = save.totalRounds;
+    currentRound = save.currentRound;
+    seriesScores = save.seriesScores;
+  } else {
+    resetContinuousState();
+  }
+
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+
+  // Show board size label
+  const sizeLabel = document.getElementById('board-size-label');
+  sizeLabel.textContent = state.BOARD_SIZE + '×' + state.BOARD_SIZE;
+  sizeLabel.style.display = '';
+
   selectedPieceIdx = null;
   currentShape = null;
   ghostPos = null;
   cpuThinking = false;
+  updateRoundIndicator();
   updateTurnIndicator();
   resizeBoard();
   updatePieceList();
@@ -1280,7 +1597,7 @@ function updateContinueButton() {
   if (save && !save.gameOver) {
     const date = new Date(save.timestamp);
     const timeStr = date.toLocaleString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : 'Local 4P';
+    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : save.gameMode === 'puzzle' ? 'Perfect Place' : 'Local 4P';
     btn.querySelector('.sub').textContent = modeStr + ' - ' + timeStr;
     btn.style.display = '';
   } else {
@@ -1310,12 +1627,20 @@ function showOrderSelect() {
 
 function hideOrderSelect() {
   document.getElementById('order-select').style.display = 'none';
-  document.getElementById('main-menu').style.display = '';
+  document.getElementById('board-size-screen').style.display = 'flex';
 }
 
 function selectOrder(order) {
   state.humanPlayer = order;
   document.getElementById('order-select').style.display = 'none';
+  if (pendingGameMode === 'continuous') {
+    showRoundSelect();
+  } else {
+    showCharSelectScreen();
+  }
+}
+
+function showCharSelectScreen() {
   document.getElementById('char-select').style.display = 'flex';
   // Hide title to save space on mobile
   document.querySelector('#start-screen > h1').style.display = 'none';
@@ -1323,6 +1648,24 @@ function selectOrder(order) {
   charSelectSlot = 0;
   cpuCharacters = [null, null, null];
   renderCharSelect();
+}
+
+function showRoundSelect() {
+  document.getElementById('round-select').style.display = 'flex';
+}
+
+function hideRoundSelect() {
+  document.getElementById('round-select').style.display = 'none';
+  document.getElementById('order-select').style.display = 'flex';
+}
+
+function confirmRounds(rounds) {
+  totalRounds = rounds;
+  currentRound = 1;
+  continuousMode = true;
+  seriesScores = [0, 0, 0, 0];
+  document.getElementById('round-select').style.display = 'none';
+  showCharSelectScreen();
 }
 
 let charSelectSlot = 0;
@@ -1335,9 +1678,13 @@ function charSelectBack() {
     renderCharSelect();
   } else {
     document.getElementById('char-select').style.display = 'none';
-    document.getElementById('order-select').style.display = 'flex';
     document.querySelector('#start-screen > h1').style.display = '';
     document.querySelector('#start-screen > p').style.display = '';
+    if (pendingGameMode === 'continuous') {
+      document.getElementById('round-select').style.display = 'flex';
+    } else {
+      document.getElementById('order-select').style.display = 'flex';
+    }
   }
 }
 
@@ -1423,29 +1770,91 @@ function confirmCharSelect() {
   setTimeout(function() {
     document.getElementById('char-select').style.display = 'none';
     document.getElementById('char-start-btn').disabled = false;
-    startGame('cpu');
+    startGame(pendingGameMode === 'continuous' ? 'continuous' : 'cpu');
   }, 600);
 }
 
 let selectedBoardSize = 20;
 let pendingGameMode = 'cpu';
 
+// Continuous Battle state
+let continuousMode = false;
+let totalRounds = 0;
+let currentRound = 0;
+let seriesScores = [0, 0, 0, 0]; // cumulative scores per player
+
+function resetContinuousState() {
+  continuousMode = false;
+  totalRounds = 0;
+  currentRound = 0;
+  seriesScores = [0, 0, 0, 0];
+  document.getElementById('round-indicator').classList.remove('show');
+}
+
+function updateRoundIndicator() {
+  var el = document.getElementById('round-indicator');
+  if (continuousMode) {
+    el.textContent = 'R' + currentRound + '/' + totalRounds;
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+function showBattleMenu() {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('battle-menu').style.display = 'flex';
+}
+
+function hideBattleMenu() {
+  document.getElementById('battle-menu').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
+
+function showPuzzleMenu() {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('puzzle-menu').style.display = 'flex';
+}
+
+function hidePuzzleMenu() {
+  document.getElementById('puzzle-menu').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
+
 function showBoardSizeSelect(mode) {
   pendingGameMode = mode;
-  document.getElementById('main-menu').style.display = 'none';
+  // Hide whichever submenu is showing
+  document.getElementById('battle-menu').style.display = 'none';
+  document.getElementById('puzzle-menu').style.display = 'none';
+  // Update subtitles for puzzle mode to show total pieces
+  if (mode === 'puzzle') {
+    document.querySelector('#btn-size-14 .sub').textContent = '48 pieces (12 × 4 colors)';
+    document.querySelector('#btn-size-20 .sub').textContent = '84 pieces (21 × 4 colors)';
+    document.querySelector('#btn-size-24 .sub').textContent = '112 pieces (28 × 4 colors)';
+  } else {
+    document.querySelector('#btn-size-14 .sub').textContent = 'Quick Game · 12 pieces';
+    document.querySelector('#btn-size-20 .sub').textContent = 'Standard · 21 pieces';
+    document.querySelector('#btn-size-24 .sub').textContent = 'Deep Strategy · 28 pieces';
+  }
   document.getElementById('board-size-screen').style.display = 'flex';
 }
 
 function hideBoardSizeSelect() {
   document.getElementById('board-size-screen').style.display = 'none';
-  document.getElementById('main-menu').style.display = 'flex';
+  if (pendingGameMode === 'puzzle') {
+    document.getElementById('puzzle-menu').style.display = 'flex';
+  } else {
+    document.getElementById('battle-menu').style.display = 'flex';
+  }
 }
 
 function confirmBoardSize(size) {
   selectedBoardSize = size;
   document.getElementById('board-size-screen').style.display = 'none';
-  if (pendingGameMode === 'cpu') {
+  if (pendingGameMode === 'cpu' || pendingGameMode === 'continuous') {
     showOrderSelect();
+  } else if (pendingGameMode === 'puzzle') {
+    startGame('puzzle');
   } else {
     startGame('local');
   }
@@ -1454,11 +1863,12 @@ function confirmBoardSize(size) {
 function startGame(mode) {
   state.BOARD_SIZE = selectedBoardSize;
   deleteSave(); // Clear old save when starting new game
-  state.gameMode = mode;
-  if (mode === 'local') state.humanPlayer = -1; // No CPU in local mode
+  // For continuous mode, use 'cpu' internally for game logic
+  state.gameMode = (mode === 'continuous') ? 'cpu' : mode;
+  if (mode === 'local' || mode === 'puzzle') state.humanPlayer = -1; // No CPU
 
   // Build players array with human name at correct position
-  if (mode === 'cpu') {
+  if (mode === 'cpu' || mode === 'continuous') {
     const colors = [
       { color: '#0072B2', light: '#4da6d9' },
       { color: '#F0E442', light: '#f5ed7a' },
@@ -1477,12 +1887,23 @@ function startGame(mode) {
         cpuIdx++;
       }
     }
+  } else if (mode === 'puzzle') {
+    players = PLAYERS_PUZZLE;
   } else {
     players = PLAYERS_LOCAL;
   }
 
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+
+  if (continuousMode) {
+    updateRoundIndicator();
+  }
+
+  // Show board size label
+  const sizeLabel = document.getElementById('board-size-label');
+  sizeLabel.textContent = selectedBoardSize + '×' + selectedBoardSize;
+  sizeLabel.style.display = '';
 
   initGame();
 }
@@ -1496,6 +1917,16 @@ function initGame() {
   updateTurnIndicator();
   resizeBoard();
   updatePieceList();
+
+  // Show puzzle intro overlay
+  if (state.gameMode === 'puzzle') {
+    const piecesPerPlayer = state.playerPieces[0].length;
+    const totalPieces = piecesPerPlayer * 4;
+    document.getElementById('puzzle-intro-size').textContent =
+      state.BOARD_SIZE + '×' + state.BOARD_SIZE + ' board — ' + totalPieces + ' pieces (' + piecesPerPlayer + ' × 4 colors)';
+    document.getElementById('puzzle-intro-overlay').classList.add('show');
+    return;
+  }
 
   // If first player is CPU, start their turn
   if (isCpuPlayer(state.currentPlayer) && !state.gameOver) {
@@ -1713,8 +2144,12 @@ function quitToTitle() {
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
-  hideOrderSelect();
+  document.getElementById('battle-menu').style.display = 'none';
+  document.getElementById('puzzle-menu').style.display = 'none';
+  document.getElementById('board-size-screen').style.display = 'none';
+  document.getElementById('order-select').style.display = 'none';
   document.getElementById('char-select').style.display = 'none';
+  document.getElementById('round-select').style.display = 'none';
   const save = loadGame();
   const continueBtn = document.getElementById('continue-btn');
   if (continueBtn) continueBtn.style.display = save ? 'inline-block' : 'none';
@@ -1725,13 +2160,18 @@ function backToTitle() {
   document.getElementById('modal-overlay').classList.remove('show');
   document.getElementById('modal-close-btn').style.display = '';
   deleteSave();
+  resetContinuousState();
   document.getElementById('app').style.display = 'none';
   document.getElementById('start-screen').style.display = 'flex';
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
-  hideOrderSelect();
+  document.getElementById('battle-menu').style.display = 'none';
+  document.getElementById('puzzle-menu').style.display = 'none';
+  document.getElementById('board-size-screen').style.display = 'none';
+  document.getElementById('order-select').style.display = 'none';
   document.getElementById('char-select').style.display = 'none';
+  document.getElementById('round-select').style.display = 'none';
 }
 
 window.addEventListener('resize', () => {
@@ -1972,6 +2412,7 @@ function endTutorial() {
   document.querySelector('#start-screen > h1').style.display = '';
   document.querySelector('#start-screen > p').style.display = '';
   document.getElementById('main-menu').style.display = 'flex';
+  document.getElementById('battle-menu').style.display = 'none';
 }
 
 // Called when placement fails during tutorial - show edge NG feedback
@@ -2009,8 +2450,14 @@ function onTutorialPiecePlaced() {
 function setupEventListeners() {
   // Start screen
   document.getElementById('continue-btn').addEventListener('click', resumeGame);
+  document.getElementById('btn-battle').addEventListener('click', showBattleMenu);
+  document.getElementById('btn-battle-back').addEventListener('click', hideBattleMenu);
   document.getElementById('btn-vs-cpu').addEventListener('click', function() { showBoardSizeSelect('cpu'); });
   document.getElementById('btn-local-4p').addEventListener('click', function() { showBoardSizeSelect('local'); });
+  document.getElementById('btn-continuous').addEventListener('click', function() { showBoardSizeSelect('continuous'); });
+  document.getElementById('btn-puzzle-menu').addEventListener('click', showPuzzleMenu);
+  document.getElementById('btn-puzzle-back').addEventListener('click', hidePuzzleMenu);
+  document.getElementById('btn-puzzle').addEventListener('click', function() { showBoardSizeSelect('puzzle'); });
   document.getElementById('btn-tutorial').addEventListener('click', startTutorial);
   document.getElementById('btn-stats').addEventListener('click', showStats);
 
@@ -2019,6 +2466,12 @@ function setupEventListeners() {
   document.getElementById('btn-size-20').addEventListener('click', function() { confirmBoardSize(20); });
   document.getElementById('btn-size-24').addEventListener('click', function() { confirmBoardSize(24); });
   document.getElementById('btn-size-back').addEventListener('click', hideBoardSizeSelect);
+
+  // Round select
+  document.getElementById('btn-round-3').addEventListener('click', function() { confirmRounds(3); });
+  document.getElementById('btn-round-5').addEventListener('click', function() { confirmRounds(5); });
+  document.getElementById('btn-round-10').addEventListener('click', function() { confirmRounds(10); });
+  document.getElementById('btn-round-back').addEventListener('click', hideRoundSelect);
 
   // Order select
   document.getElementById('btn-order-0').addEventListener('click', function() { selectOrder(0); });
@@ -2062,6 +2515,15 @@ function setupEventListeners() {
   });
   document.getElementById('tutorial-overlay').addEventListener('click', function() {}); // prevent click-through
   document.getElementById('tutorial-box').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  // Puzzle intro overlay
+  document.getElementById('puzzle-intro-start-btn').addEventListener('click', function() {
+    document.getElementById('puzzle-intro-overlay').classList.remove('show');
+    resizeBoard();
+    drawBoard();
+  });
+  document.getElementById('puzzle-intro-overlay').addEventListener('click', function() {}); // prevent click-through
+  document.getElementById('puzzle-intro-box').addEventListener('click', function(e) { e.stopPropagation(); });
 }
 </script>
 <div id="stats-overlay">
@@ -2081,6 +2543,28 @@ function setupEventListeners() {
   </div>
 </div>
 <div id="tutorial-hint"></div>
+
+<div id="puzzle-intro-overlay">
+  <div id="puzzle-intro-box">
+    <h2>PERFECT PLACE</h2>
+    <p id="puzzle-intro-size" style="text-align:center;color:#e94560;font-size:13px;margin-bottom:8px;font-family:'Orbitron',sans-serif;letter-spacing:1px;"></p>
+    <div id="puzzle-intro-content">
+      <h3>OBJECTIVE</h3>
+      <p>Place <b>all pieces of all 4 colors</b> on the board.</p>
+      <p class="ja">4色すべてのピースを、1つ残らずボードに配置しましょう。</p>
+      <h3>RULES</h3>
+      <p>Standard 4-player rules apply. You control all 4 colors in turn order.</p>
+      <p class="ja">通常の4人対戦ルールに従います。4色を順番に操作します。</p>
+      <ul>
+        <li>Same-color pieces must connect <b>corner-to-corner</b></li>
+        <li>Same-color pieces must <b>never share an edge</b></li>
+        <li>Different colors <b>may</b> share edges</li>
+      </ul>
+      <p class="ja">同色は角で接続・辺の接触は禁止。異なる色同士は辺の接触OK。</p>
+    </div>
+    <button id="puzzle-intro-start-btn">START</button>
+  </div>
+</div>
 
 </body>
 </html>

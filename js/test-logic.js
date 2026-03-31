@@ -76,7 +76,10 @@ async function runTests() {
     GL.setGameState(s);
     assert('all unused = -89', GL.getScore(0) === -89);
     s.playerPieces[0].forEach(p => p.used = true);
-    assert('all used = +15', GL.getScore(0) === 15);
+    s.lastPlacedCells[0] = [[0, 0], [0, 1]];
+    assert('all used, last piece >1 tile = +15', GL.getScore(0) === 15);
+    s.lastPlacedCells[0] = [[0, 0]];
+    assert('all used, last piece 1 tile = +20', GL.getScore(0) === 20);
   }
 
   section('hasValidMove');

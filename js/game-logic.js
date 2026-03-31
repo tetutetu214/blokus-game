@@ -328,8 +328,8 @@ function getScore(player) {
   const pieces = state.playerPieces[player];
   const remaining = pieces.filter(p => !p.used).reduce((sum, p) => sum + p.shape.length, 0);
   if (remaining === 0) {
-    const lastPiece = pieces[pieces.length - 1];
-    return lastPiece.shape.length === 1 ? 20 : 15;
+    const lastCells = state.lastPlacedCells[player];
+    return (lastCells && lastCells.length === 1) ? 20 : 15;
   }
   return -remaining;
 }

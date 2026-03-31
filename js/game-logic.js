@@ -39,23 +39,73 @@ function initState(boardSize, gameMode, humanPlayer) {
 }
 
 function restoreState(saveData) {
-  state.BOARD_SIZE = saveData.boardSize || 20;
+  if (!saveData || typeof saveData !== 'object') {
+    throw new Error('Invalid save data');
+  }
+
+  // Validate boardSize
+  const size = [14, 20, 24].includes(saveData.boardSize) ? saveData.boardSize : 20;
+  state.BOARD_SIZE = size;
+
+  // Validate board
+  if (!Array.isArray(saveData.board) || saveData.board.length !== size) {
+    throw new Error('Invalid board data');
+  }
+  for (let r = 0; r < size; r++) {
+    if (!Array.isArray(saveData.board[r]) || saveData.board[r].length !== size) {
+      throw new Error('Invalid board data');
+    }
+  }
   state.board = saveData.board;
-  state.currentPlayer = saveData.currentPlayer;
-  state.passCount = saveData.passCount;
-  state.gameOver = saveData.gameOver;
-  state.playerPassed = saveData.playerPassed;
-  state.lastPlacedCells = saveData.lastPlacedCells || [[], [], [], []];
-  state.humanPlayer = saveData.humanPlayer !== undefined ? saveData.humanPlayer : 0;
-  state.gameMode = saveData.gameMode;
+
+  // Validate currentPlayer (0-3)
+  state.currentPlayer = (Number.isInteger(saveData.currentPlayer) && saveData.currentPlayer >= 0 && saveData.currentPlayer <= 3)
+    ? saveData.currentPlayer : 0;
+
+  // Validate passCount (0-4)
+  state.passCount = (Number.isInteger(saveData.passCount) && saveData.passCount >= 0 && saveData.passCount <= 4)
+    ? saveData.passCount : 0;
+
+  // Validate gameOver
+  state.gameOver = saveData.gameOver === true;
+
+  // Validate playerPassed (array of 4 booleans)
+  if (Array.isArray(saveData.playerPassed) && saveData.playerPassed.length === 4) {
+    state.playerPassed = saveData.playerPassed.map(v => v === true);
+  } else {
+    state.playerPassed = [false, false, false, false];
+  }
+
+  // Validate lastPlacedCells (array of 4 arrays)
+  if (Array.isArray(saveData.lastPlacedCells) && saveData.lastPlacedCells.length === 4
+      && saveData.lastPlacedCells.every(a => Array.isArray(a))) {
+    state.lastPlacedCells = saveData.lastPlacedCells;
+  } else {
+    state.lastPlacedCells = [[], [], [], []];
+  }
+
+  // Validate humanPlayer (0-3)
+  state.humanPlayer = (Number.isInteger(saveData.humanPlayer) && saveData.humanPlayer >= 0 && saveData.humanPlayer <= 3)
+    ? saveData.humanPlayer : 0;
+
+  // Validate gameMode
+  state.gameMode = ['cpu', 'puzzle', 'local'].includes(saveData.gameMode) ? saveData.gameMode : 'cpu';
+
+  // Validate pieceUsed
+  if (!Array.isArray(saveData.pieceUsed) || saveData.pieceUsed.length !== 4) {
+    throw new Error('Invalid pieceUsed data');
+  }
 
   const activeIdx = (state.BOARD_SIZE === 14) ? PIECES_14 : (state.BOARD_SIZE === 24) ? PIECES_24 : null;
   state.playerPieces = [];
   for (let p = 0; p < 4; p++) {
+    if (!Array.isArray(saveData.pieceUsed[p])) {
+      throw new Error('Invalid pieceUsed data');
+    }
     if (activeIdx) {
-      state.playerPieces.push(activeIdx.map((si, idx) => ({ shape: PIECE_SHAPES[si].map(s => [...s]), used: saveData.pieceUsed[p][idx] })));
+      state.playerPieces.push(activeIdx.map((si, idx) => ({ shape: PIECE_SHAPES[si].map(s => [...s]), used: saveData.pieceUsed[p][idx] === true })));
     } else {
-      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map((shape, idx) => ({ shape: shape.map(s => [...s]), used: saveData.pieceUsed[p][idx] })));
+      state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map((shape, idx) => ({ shape: shape.map(s => [...s]), used: saveData.pieceUsed[p][idx] === true })));
     }
   }
 }

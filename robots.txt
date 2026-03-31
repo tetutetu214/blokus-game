@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kado-game.pages.dev/sitemap.xml
+Sitemap: https://tetutetu214.com/game/kado/sitemap.xml

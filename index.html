@@ -2175,8 +2175,12 @@ function backToTitle() {
   document.getElementById('round-select').style.display = 'none';
 }
 
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  if (document.getElementById('app').style.display !== 'none') resizeBoard();
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (document.getElementById('app').style.display !== 'none') resizeBoard();
+  }, 100);
 });
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {

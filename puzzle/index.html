@@ -755,8 +755,12 @@ document.getElementById('clear-title-btn').addEventListener('click', function() 
 // Show intro overlay on page load
 document.getElementById('puzzle-intro-overlay').classList.add('show');
 
+let resizeTimeout;
 window.addEventListener('resize', function() {
-  if (document.getElementById('app').style.display !== 'none') resizeBoard();
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(function() {
+    if (document.getElementById('app').style.display !== 'none') resizeBoard();
+  }, 100);
 });
 window.addEventListener('orientationchange', function() {
   setTimeout(function() {

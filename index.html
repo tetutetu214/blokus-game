@@ -666,14 +666,16 @@ function flipPiece() {
 var cpuWorker = null;
 var workerFailed = false;
 
-try {
-  cpuWorker = new Worker('./js/worker.js');
-} catch(e) {
-  console.warn('Worker creation failed, using main thread fallback:', e);
-  workerFailed = true;
-}
+function initWorker() {
+  if (cpuWorker) return;
+  try {
+    cpuWorker = new Worker('./js/worker.js');
+  } catch(e) {
+    console.warn('Worker creation failed, using main thread fallback:', e);
+    workerFailed = true;
+    return;
+  }
 
-if (cpuWorker) {
   cpuWorker.onmessage = function(e) {
     var move = e.data;
     if (move) {
@@ -705,6 +707,17 @@ if (cpuWorker) {
     }
   };
 }
+
+function cleanupWorker() {
+  if (cpuWorker) {
+    cpuWorker.terminate();
+    cpuWorker = null;
+  }
+}
+
+initWorker();
+
+window.addEventListener('beforeunload', cleanupWorker);
 
 function cpuMoveFallback() {
   var ch = getCpuCharacter(state.currentPlayer);
@@ -1862,6 +1875,7 @@ function confirmBoardSize(size) {
 }
 
 function startGame(mode) {
+  initWorker();
   state.BOARD_SIZE = selectedBoardSize;
   deleteSave(); // Clear old save when starting new game
   // For continuous mode, use 'cpu' internally for game logic
@@ -2137,6 +2151,7 @@ function quitToTitle() {
     endTutorial();
     return;
   }
+  cleanupWorker();
   if (!state.gameOver) {
     saveGame();
   }

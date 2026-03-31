@@ -17,7 +17,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Orbitron
 #header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #0d1528; border-bottom: 1px solid rgba(233,69,96,0.3); }
 #header h1 { font-size: 16px; letter-spacing: 3px; color: #e94560; text-shadow: 0 0 10px rgba(233,69,96,0.5); }
 #progress { font-size: 13px; font-weight: bold; color: #4da6d9; letter-spacing: 1px; }
-#quit-btn { background: none; border: 1px solid rgba(233,69,96,0.3); color: #e94560; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+#quit-btn { background: #555; border: none; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
 
 /* Board area */
 #board-container { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; min-height: 0; }
@@ -116,10 +116,7 @@ canvas#board { display: block; touch-action: none; }
       </ul>
       <p class="ja">同色は角で接続・辺の接触は禁止。異なる色同士は辺の接触OK。各色の最初のピースはどこにでも置けます。</p>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;">
-      <button id="puzzle-intro-back-btn" style="display:block;background:transparent;border:1px solid rgba(85,85,85,0.5);color:#aaa;padding:10px 20px;border-radius:4px;font-size:14px;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:'Orbitron',sans-serif;transition:all 0.2s;">BACK</button>
-      <button id="puzzle-intro-start-btn">START</button>
-    </div>
+    <button id="puzzle-intro-start-btn">START</button>
   </div>
 </div>
 
@@ -742,7 +739,6 @@ function startPuzzle() {
 
 // ===== Event Listeners =====
 document.getElementById('puzzle-intro-start-btn').addEventListener('click', startPuzzle);
-document.getElementById('puzzle-intro-back-btn').addEventListener('click', goBack);
 document.getElementById('puzzle-intro-overlay').addEventListener('click', function() {}); // prevent click-through
 document.getElementById('puzzle-intro-box').addEventListener('click', function(e) { e.stopPropagation(); });
 document.getElementById('quit-btn').addEventListener('click', goBack);

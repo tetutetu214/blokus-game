@@ -40,7 +40,7 @@
 <meta name="twitter:description" content="A free Blokus-inspired strategy game playable instantly in your browser. No download, no login. Play solo vs AI or local 4-player!">
 <meta name="twitter:image" content="https://tetutetu214.com/game/kado/ogp.png">
 
-<!-- Prefetch puzzle page for faster navigation -->
+<!-- Prefetch split pages for faster navigation -->
 <link rel="prefetch" href="/puzzle/">
 
 <!-- JSON-LD Structured Data -->
@@ -395,6 +395,15 @@ canvas#board { display: block; touch-action: none; }
 
 <script src="js/game-logic.js"></script>
 <script>
+
+// ===== View Transition Helper =====
+function withViewTransition(callback) {
+  if (document.startViewTransition) {
+    document.startViewTransition(callback);
+  } else {
+    callback();
+  }
+}
 
 // ===== Constants =====
 // state.BOARD_SIZE is now in state (game-logic.js)
@@ -1611,8 +1620,10 @@ function resumeGame() {
     resetContinuousState();
   }
 
-  document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  withViewTransition(() => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  });
 
   // Show board size label
   const sizeLabel = document.getElementById('board-size-label');
@@ -1937,8 +1948,10 @@ function startGame(mode) {
     players = PLAYERS_LOCAL;
   }
 
-  document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  withViewTransition(() => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  });
 
   if (continuousMode) {
     updateRoundIndicator();
@@ -2187,17 +2200,19 @@ function quitToTitle() {
   if (!state.gameOver) {
     saveGame();
   }
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('start-screen').style.display = 'flex';
-  document.querySelector('#start-screen > h1').style.display = '';
-  document.querySelector('#start-screen > p').style.display = '';
-  document.getElementById('main-menu').style.display = 'flex';
-  document.getElementById('battle-menu').style.display = 'none';
-  document.getElementById('puzzle-menu').style.display = 'none';
-  document.getElementById('board-size-screen').style.display = 'none';
-  document.getElementById('order-select').style.display = 'none';
-  document.getElementById('char-select').style.display = 'none';
-  document.getElementById('round-select').style.display = 'none';
+  withViewTransition(() => {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    document.querySelector('#start-screen > h1').style.display = '';
+    document.querySelector('#start-screen > p').style.display = '';
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('battle-menu').style.display = 'none';
+    document.getElementById('puzzle-menu').style.display = 'none';
+    document.getElementById('board-size-screen').style.display = 'none';
+    document.getElementById('order-select').style.display = 'none';
+    document.getElementById('char-select').style.display = 'none';
+    document.getElementById('round-select').style.display = 'none';
+  });
   const save = loadGame();
   const continueBtn = document.getElementById('continue-btn');
   if (continueBtn) continueBtn.style.display = save ? 'inline-block' : 'none';
@@ -2209,17 +2224,19 @@ function backToTitle() {
   document.getElementById('modal-close-btn').style.display = '';
   deleteSave();
   resetContinuousState();
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('start-screen').style.display = 'flex';
-  document.querySelector('#start-screen > h1').style.display = '';
-  document.querySelector('#start-screen > p').style.display = '';
-  document.getElementById('main-menu').style.display = 'flex';
-  document.getElementById('battle-menu').style.display = 'none';
-  document.getElementById('puzzle-menu').style.display = 'none';
-  document.getElementById('board-size-screen').style.display = 'none';
-  document.getElementById('order-select').style.display = 'none';
-  document.getElementById('char-select').style.display = 'none';
-  document.getElementById('round-select').style.display = 'none';
+  withViewTransition(() => {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    document.querySelector('#start-screen > h1').style.display = '';
+    document.querySelector('#start-screen > p').style.display = '';
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('battle-menu').style.display = 'none';
+    document.getElementById('puzzle-menu').style.display = 'none';
+    document.getElementById('board-size-screen').style.display = 'none';
+    document.getElementById('order-select').style.display = 'none';
+    document.getElementById('char-select').style.display = 'none';
+    document.getElementById('round-select').style.display = 'none';
+  });
 }
 
 let resizeTimeout;
@@ -2400,8 +2417,10 @@ function startTutorial() {
   ];
 
   // Show game screen
-  document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  withViewTransition(() => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  });
 
   // Initialize UI
   selectedPieceIdx = null;
@@ -2459,12 +2478,14 @@ function endTutorial() {
   document.getElementById('tutorial-hint').className = '';
 
   // Return to title
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('start-screen').style.display = 'flex';
-  document.querySelector('#start-screen > h1').style.display = '';
-  document.querySelector('#start-screen > p').style.display = '';
-  document.getElementById('main-menu').style.display = 'flex';
-  document.getElementById('battle-menu').style.display = 'none';
+  withViewTransition(() => {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    document.querySelector('#start-screen > h1').style.display = '';
+    document.querySelector('#start-screen > p').style.display = '';
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('battle-menu').style.display = 'none';
+  });
 }
 
 // Called when placement fails during tutorial - show edge NG feedback

@@ -331,15 +331,21 @@ function resizeBoard() {
   var csW = Math.floor(availW / COLS);
   var csH = Math.floor(availH / ROWS);
   cellSize = Math.min(csW, csH);
-  canvas.width = cellSize * COLS;
-  canvas.height = cellSize * ROWS;
-  canvas.style.width = canvas.width + 'px';
-  canvas.style.height = canvas.height + 'px';
+  var logicalW = cellSize * COLS;
+  var logicalH = cellSize * ROWS;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = logicalW * dpr;
+  canvas.height = logicalH * dpr;
+  canvas.style.width = logicalW + 'px';
+  canvas.style.height = logicalH + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawBoard();
 }
 
 function drawBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var logicalW = cellSize * COLS;
+  var logicalH = cellSize * ROWS;
+  ctx.clearRect(0, 0, logicalW, logicalH);
 
   for (var r = 0; r < ROWS; r++) {
     for (var c = 0; c < COLS; c++) {
@@ -488,9 +494,15 @@ function updatePieceList() {
       var maxC = Math.max.apply(null, shape.map(function(s) { return s[1]; })) + 1;
       var cs = Math.min(20, Math.floor(60 / Math.max(maxR, maxC)));
       var cvs = document.createElement('canvas');
-      cvs.width = maxC * cs + 2;
-      cvs.height = maxR * cs + 2;
+      var dpr = window.devicePixelRatio || 1;
+      var lw = maxC * cs + 2;
+      var lh = maxR * cs + 2;
+      cvs.width = lw * dpr;
+      cvs.height = lh * dpr;
+      cvs.style.width = lw + 'px';
+      cvs.style.height = lh + 'px';
       var cx = cvs.getContext('2d');
+      cx.scale(dpr, dpr);
       shape.forEach(function(s) {
         cx.fillStyle = COLORS[activeColor].color;
         cx.fillRect(s[1] * cs + 1, s[0] * cs + 1, cs - 1, cs - 1);

@@ -72,6 +72,7 @@ canvas#board { display: block; touch-action: none; }
 /* No valid moves toast */
 #no-moves-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(180,40,60,0.95); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 13px; z-index: 60; text-align: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; animation: fadeInOut 2.5s ease-in-out; pointer-events: none; }
 @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#save-error-toast { display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(180,40,60,0.95); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 14px; z-index: 9999; text-align: center; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -86,6 +87,7 @@ canvas#board { display: block; touch-action: none; }
     <canvas id="board"></canvas>
     <div id="no-moves-toast"></div>
   </div>
+  <div id="save-error-toast">Save failed - storage full</div>
   <div id="color-selector"></div>
   <div id="piece-panel">
     <div id="piece-controls">
@@ -185,6 +187,16 @@ function getAllOrientations(shape) {
     s = flipH(shape.map(function(c) { return [c[0], c[1]]; }));
   }
   return orientations;
+}
+
+// ===== Save Error Toast =====
+function showSaveErrorToast() {
+  var toast = document.getElementById('save-error-toast');
+  toast.style.display = 'block';
+  toast.style.animation = 'none';
+  toast.offsetHeight;
+  toast.style.animation = 'fadeInOut 3s ease-in-out';
+  setTimeout(function() { toast.style.display = 'none'; }, 3000);
 }
 
 // ===== Game State =====
@@ -723,7 +735,10 @@ function showClear() {
       var bSec = parseInt(best) % 60;
       document.getElementById('clear-time').textContent += ' (BEST: ' + bMin + ':' + (bSec < 10 ? '0' : '') + bSec + ')';
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('Best time save failed:', e);
+    showSaveErrorToast();
+  }
 
   document.getElementById('clear-overlay').classList.add('show');
 }

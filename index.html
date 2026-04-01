@@ -126,7 +126,7 @@ canvas#board { display: block; touch-action: none; }
 #quit-btn { background: #555; color: #fff; font-size: 14px; }
 
 /* Start screen */
-#start-screen { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; gap: 20px; padding: 40px 0 30px; overflow-y: auto; }
+#start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px; }
 #start-screen h1 { font-size: 42px; letter-spacing: 8px; margin-bottom: 10px; font-weight: 900; color: #e94560; text-shadow: 0 0 10px rgba(233,69,96,0.6), 0 0 30px rgba(233,69,96,0.4), 0 0 60px rgba(233,69,96,0.2); }
 #start-screen p { font-size: 11px; color: #667; margin-bottom: 10px; letter-spacing: 3px; text-transform: uppercase; }
 .start-btn { background: transparent; border: 1px solid rgba(233,69,96,0.4); color: #eee; padding: 16px 40px; border-radius: 4px; font-size: 16px; cursor: pointer; width: 260px; text-align: center; touch-action: manipulation; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; box-shadow: 0 0 8px rgba(233,69,96,0.15), inset 0 0 8px rgba(233,69,96,0.05); }
@@ -134,11 +134,6 @@ canvas#board { display: block; touch-action: none; }
 .start-btn:active { background: rgba(233,69,96,0.3); border-color: #e94560; box-shadow: 0 0 25px rgba(233,69,96,0.5), inset 0 0 15px rgba(233,69,96,0.15); }
 .start-btn .sub { font-size: 9px; color: #556; display: block; margin-top: 4px; letter-spacing: 1px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
 #main-menu { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-#game-description { max-width: 480px; width: 90%; margin-top: 12px; padding: 16px 20px; background: rgba(13,21,40,0.8); border: 1px solid rgba(233,69,96,0.15); border-radius: 6px; text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; }
-#game-description h2 { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #e94560; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
-#game-description p { font-size: 12px; color: #99a; margin-bottom: 8px; }
-#game-description ul { font-size: 12px; color: #99a; padding-left: 18px; margin-bottom: 8px; }
-#game-description li { margin-bottom: 4px; }
 #stats-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; }
 #stats-overlay.show { display: flex; }
 #stats-modal { background: #0d1528; border: 1px solid rgba(233,69,96,0.3); border-radius: 4px; padding: 20px; max-width: 700px; width: 90%; text-align: center; box-shadow: 0 0 30px rgba(233,69,96,0.15); }
@@ -351,21 +346,7 @@ canvas#board { display: block; touch-action: none; }
     </button>
     <button id="btn-round-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
   </div>
-  <section id="game-description">
-    <h2>KADOとは？</h2>
-    <p>KADOはブロックス（Blokus）にインスパイアされた無料のブラウザ戦略ボードゲームです。ダウンロードや会員登録は不要で、スマートフォンやPCから今すぐ遊べます。</p>
-    <h2>遊び方</h2>
-    <p>自分のピースを「角と角」でつなげてボード上に配置していきます。辺同士が接してはいけないのがポイント。相手をブロックしながら、できるだけ多くのピースを置ききりましょう。</p>
-    <h2>ゲームモード</h2>
-    <ul>
-      <li><strong>1P vs CPU</strong> — AIと1対1の対戦</li>
-      <li><strong>ローカル4人対戦</strong> — 端末を回して4人で遊べるパス＆プレイ</li>
-      <li><strong>連続対戦</strong> — 3・5・10回戦のシリーズマッチ</li>
-      <li><strong>パズルモード</strong> — すべてのピースを盤面に置ききるソロチャレンジ</li>
-    </ul>
-    <h2>ボードサイズ</h2>
-    <p>14×14（クイック）・20×20（スタンダード）・24×24（じっくり戦略）の3種類から選べます。</p>
-  </section>
+
 </div>
 
 <!-- 特定商取引法モーダル -->

@@ -2020,23 +2020,25 @@ function startTutorial() {
   ];
 
   // Show game screen
-  document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  withViewTransition(() => {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
 
-  // Initialize UI
-  selectedPieceIdx = null;
-  currentShape = null;
-  ghostPos = null;
-  cpuThinking = false;
-  undoState = null;
-  document.getElementById('undo-btn').disabled = true;
+    // Initialize UI
+    selectedPieceIdx = null;
+    currentShape = null;
+    ghostPos = null;
+    cpuThinking = false;
+    undoState = null;
+    document.getElementById('undo-btn').disabled = true;
 
-  updateTurnIndicator();
-  resizeBoard();
-  updatePieceList();
+    updateTurnIndicator();
+    resizeBoard();
+    updatePieceList();
 
-  // Show first tutorial step
-  showTutorialStep();
+    // Show first tutorial step
+    showTutorialStep();
+  });
 }
 
 function showTutorialStep() {
@@ -2079,12 +2081,14 @@ function endTutorial() {
   document.getElementById('tutorial-hint').className = '';
 
   // Return to title
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('start-screen').style.display = 'flex';
-  document.querySelector('#start-screen > h1').style.display = '';
-  document.querySelector('#start-screen > p').style.display = '';
-  document.getElementById('main-menu').style.display = 'flex';
-  document.getElementById('battle-menu').style.display = 'none';
+  withViewTransition(() => {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    document.querySelector('#start-screen > h1').style.display = '';
+    document.querySelector('#start-screen > p').style.display = '';
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('battle-menu').style.display = 'none';
+  });
 }
 
 // Called when placement fails during tutorial - show edge NG feedback

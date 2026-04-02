@@ -124,7 +124,7 @@
       PERFECT PLACE
       <span class="sub">Place all pieces on the board</span>
     </button>
-    <button class="start-btn" onclick="location.href='puzzle/'">
+    <button id="btn-tetromino" class="start-btn">
       TETROMINO RECT
       <span class="sub">8×10 / 20 tetromino pieces</span>
     </button>
@@ -193,6 +193,7 @@
   <div id="header">
     <h1>KADO</h1>
     <span id="board-size-label" style="display:none;font-size:10px;color:#888;font-family:'Orbitron',sans-serif;"></span>
+    <span id="tetromino-progress" style="display:none;">0 / 80</span>
     <span id="turn-indicator">● P1</span>
     <span id="round-indicator"></span>
     <button id="score-btn">SCORE</button>
@@ -203,9 +204,11 @@
       <canvas id="board"></canvas>
       <div id="cpu-thinking">CPU THINKING...</div>
       <div id="auto-pass-toast"><span class="pass-name"></span><br>No valid moves - AUTO PASS</div>
+      <div id="no-moves-toast"></div>
     </div>
   </div>
   <div id="save-error-toast">Save failed - storage full</div>
+  <div id="color-selector"></div>
   <div id="piece-panel">
     <div id="piece-controls">
       <button id="rotate-btn" class="icon-btn">↻</button>
@@ -231,6 +234,7 @@
 
 <script src="js/game-logic.js"></script>
 <script src="js/main.js"></script>
+<script src="js/tetromino.js"></script>
 <script>
 // GA4 Custom Event Tracking (Issue #112)
 (function() {
@@ -405,6 +409,36 @@
       <p class="ja">同色は角で接続・辺の接触は禁止。異なる色同士は辺の接触OK。</p>
     </div>
     <button id="puzzle-intro-start-btn">START</button>
+  </div>
+</div>
+
+<div id="tetromino-intro-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:300;justify-content:center;align-items:center;">
+  <div id="puzzle-intro-box" style="pointer-events:auto;">
+    <h2>TETROMINO RECT</h2>
+    <p style="text-align:center;color:#e94560;font-size:13px;margin-bottom:8px;font-family:'Orbitron',sans-serif;letter-spacing:1px;">8 &times; 10 &mdash; 20 pieces</p>
+    <div>
+      <h3>OBJECTIVE</h3>
+      <p>Fill the <b>8 &times; 10 rectangle</b> completely using all 20 tetromino pieces.</p>
+      <p class="ja">4色 &times; 5種のテトロミノ（4マスピース）で、8 &times; 10の枠をぴったり埋めましょう。</p>
+      <h3>RULES</h3>
+      <ul>
+        <li>Same-color pieces must connect <b>corner-to-corner</b></li>
+        <li>Same-color pieces must <b>never share an edge</b></li>
+        <li>Different colors <b>may</b> share edges</li>
+        <li>First piece of each color can be placed <b>anywhere</b></li>
+      </ul>
+      <p class="ja">同色は角で接続・辺の接触は禁止。異なる色同士は辺の接触OK。各色の最初のピースはどこにでも置けます。</p>
+    </div>
+    <button id="tetromino-intro-start-btn" style="display:block;margin:16px auto 0;background:transparent;border:1px solid #e94560;color:#e94560;padding:10px 28px;border-radius:4px;font-size:14px;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:'Orbitron',sans-serif;">START</button>
+  </div>
+</div>
+
+<div id="clear-overlay">
+  <div id="clear-modal">
+    <h2>COMPLETE!</h2>
+    <div class="clear-time" id="clear-time"></div>
+    <div class="clear-msg">すべてのピースを配置しました</div>
+    <button id="clear-title-btn">TITLE</button>
   </div>
 </div>
 

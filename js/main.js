@@ -478,6 +478,7 @@ function getBoardCell(x, y) {
 }
 
 canvas.addEventListener('mousemove', (e) => {
+  if (tetrominoMode) return;
   if (!currentShape || cpuThinking || state.gameOver) return;
   if (isCpuPlayer(state.currentPlayer)) return;
   const pos = getBoardCell(e.clientX, e.clientY);
@@ -488,6 +489,7 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseleave', () => {
+  if (tetrominoMode) return;
   if (hoverPos) {
     hoverPos = null;
     drawBoard();
@@ -495,6 +497,7 @@ canvas.addEventListener('mouseleave', () => {
 });
 
 canvas.addEventListener('click', (e) => {
+  if (tetrominoMode) return;
   if (state.gameOver || cpuThinking) return;
   if (isCpuPlayer(state.currentPlayer)) return;
   const pos = getBoardCell(e.clientX, e.clientY);
@@ -502,6 +505,7 @@ canvas.addEventListener('click', (e) => {
 });
 
 canvas.addEventListener('touchstart', (e) => {
+  if (tetrominoMode) return;
   e.preventDefault();
   if (state.gameOver || cpuThinking) return;
   if (isCpuPlayer(state.currentPlayer)) return;
@@ -511,6 +515,7 @@ canvas.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
+  if (tetrominoMode) return;
   e.preventDefault();
   if (!currentShape || cpuThinking) return;
   if (isCpuPlayer(state.currentPlayer)) return;
@@ -523,6 +528,7 @@ canvas.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 canvas.addEventListener('touchend', (e) => {
+  if (tetrominoMode) return;
   e.preventDefault();
   if (ghostPos && currentShape && !cpuThinking && !isCpuPlayer(state.currentPlayer) && selectedPieceIdx !== null) {
     // ghostPos is already centered, so place directly without re-centering
@@ -1799,9 +1805,13 @@ function quitToTitle() {
     endTutorial();
     return;
   }
-  cleanupWorker();
-  if (!state.gameOver) {
-    saveGame();
+  if (tetrominoMode) {
+    exitTetrominoMode();
+  } else {
+    cleanupWorker();
+    if (!state.gameOver) {
+      saveGame();
+    }
   }
   withViewTransition(() => {
     document.getElementById('app').style.display = 'none';
@@ -1846,12 +1856,12 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    if (document.getElementById('app').style.display !== 'none') resizeBoard();
+    if (document.getElementById('app').style.display !== 'none' && !tetrominoMode) resizeBoard();
   }, 100);
 });
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
-    if (document.getElementById('app').style.display !== 'none') resizeBoard();
+    if (document.getElementById('app').style.display !== 'none' && !tetrominoMode) resizeBoard();
   }, 100);
 });
 

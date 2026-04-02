@@ -1,0 +1,23 @@
+{
+  "name": "kado-game",
+  "version": "1.0.0",
+  "description": "iPhone / スマホ / PC で遊べるポリオミノ戦略ボードゲーム。 外部ライブラリ不要。",
+  "main": "test.js",
+  "scripts": {
+    "test": "node test.js && node js/test-logic.js",
+    "test:e2e": "xvfb-run npx playwright test",
+    "test:all": "npm test && npm run test:e2e",
+    "serve": "npx serve -p 3000 --no-clipboard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:42439/git/tetutetu214/kado-game"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "serve": "^14.2.6"
+  }
+}

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9K5QFZDJ6Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9K5QFZDJ6Y');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>KADO — Free Browser Strategy Game | Blokus-style Board Game</title>
+<meta name="description" content="KADO is a free browser-based strategy board game. Connect pieces corner-to-corner in Blokus-style rules to dominate the board. No download required — play instantly on mobile or PC. Features 1P vs AI, 4-player local multiplayer, and puzzle modes.">
+<meta name="keywords" content="KADO, free board game, Blokus, browser game, strategy game, block puzzle, free multiplayer game, tabletop game online, HTML5 game, no download">
+<meta name="author" content="tetutetu214">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%224%22%20fill%3D%22%230a0a1a%22/%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%221%22%20fill%3D%22%230072B2%22/%3E%3Crect%20x%3D%2217%22%20y%3D%224%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%221%22%20fill%3D%22%23F0E442%22/%3E%3Crect%20x%3D%224%22%20y%3D%2217%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%221%22%20fill%3D%22%23D55E00%22/%3E%3Crect%20x%3D%2217%22%20y%3D%2217%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%221%22%20fill%3D%22%239467BD%22/%3E%3C/svg%3E">
+<link rel="canonical" href="https://tetutetu214.com/game/kado/en/">
+<link rel="alternate" hreflang="ja" href="https://tetutetu214.com/game/kado/">
+<link rel="alternate" hreflang="en" href="https://tetutetu214.com/game/kado/en/">
+<link rel="alternate" hreflang="x-default" href="https://tetutetu214.com/game/kado/">
+<meta name="google-site-verification" content="3Ior4yNmadUVQvTII3i-ATyMFAdgcWeUvDCRpAweNWU" />
+<meta name="google-site-verification" content="pKPEuq9v4VgH90lq7udeKRtpQ0aI3doJLJ6q9LRh87I" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tetutetu214.com/game/kado/en/">
+<meta property="og:title" content="KADO — Free Browser Strategy Game">
+<meta property="og:description" content="Free Blokus-style strategy board game. No download required — play instantly on mobile or PC. Features AI battles, 4-player local multiplayer, and puzzle modes!">
+<meta property="og:image" content="https://tetutetu214.com/game/kado/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="KADO">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://tetutetu214.com/game/kado/en/">
+<meta name="twitter:title" content="KADO — Free Browser Strategy Game">
+<meta name="twitter:description" content="Free Blokus-style strategy board game. No download required — play instantly on mobile or PC. Features AI battles, 4-player local multiplayer, and puzzle modes!">
+<meta name="twitter:image" content="https://tetutetu214.com/game/kado/ogp.png">
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "KADO",
+  "url": "https://tetutetu214.com/game/kado/en/",
+  "description": "KADO is a free browser-based strategy board game. Connect pieces corner-to-corner in Blokus-style rules to dominate the board. No download required — play instantly on mobile or PC.",
+  "applicationCategory": "GameApplication",
+  "genre": ["Board Game", "Strategy", "Abstract"],
+  "inLanguage": "en",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "tetutetu214"
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- Start Screen -->
+<div id="start-screen">
+  <h1>KADO</h1>
+  <p>CONNECT BY CORNERS</p>
+  <div id="main-menu">
+    <button id="continue-btn" class="start-btn" style="display:none;">
+      CONTINUE
+      <span class="sub">Resume saved game</span>
+    </button>
+    <button id="btn-battle" class="start-btn">
+      BATTLE
+      <span class="sub">1P vs CPU / Local multiplayer</span>
+    </button>
+    <button id="btn-puzzle-menu" class="start-btn">
+      PUZZLE
+      <span class="sub">Solo challenge modes</span>
+    </button>
+    <button id="btn-tutorial" class="start-btn">
+      TUTORIAL
+      <span class="sub">Learn by playing</span>
+    </button>
+    <button id="btn-stats" class="start-btn">
+      RECORDS
+      <span class="sub">View match history</span>
+    </button>
+    <button class="start-btn" onclick="window.open('https://forms.gle/J2RcZXSeLMriYmT8A','_blank')">
+      FEEDBACK
+      <span class="sub">Bug reports & requests</span>
+    </button>
+
+  </div>
+  <div id="battle-menu" style="display:none;">
+    <h2>BATTLE</h2>
+    <p>Select battle mode</p>
+    <button id="btn-vs-cpu" class="start-btn">
+      1P vs CPU
+      <span class="sub">Play against AI</span>
+    </button>
+    <button id="btn-local-4p" class="start-btn">
+      LOCAL 4P
+      <span class="sub">Pass & Play</span>
+    </button>
+    <button id="btn-continuous" class="start-btn">
+      CONTINUOUS BATTLE
+      <span class="sub">Best of 3 / 5 / 10</span>
+    </button>
+    <button id="btn-battle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
+  <div id="puzzle-menu" style="display:none;">
+    <h2>PUZZLE</h2>
+    <p>Challenge yourself</p>
+    <button id="btn-puzzle" class="start-btn">
+      PERFECT PLACE
+      <span class="sub">Place all pieces on the board</span>
+    </button>
+    <button id="btn-tetromino" class="start-btn">
+      TETROMINO RECT
+      <span class="sub">8×10 / 20 tetromino pieces</span>
+    </button>
+    <button id="btn-puzzle-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
+  <div id="board-size-screen" style="display:none;">
+    <h2>SELECT BOARD SIZE</h2>
+    <p>Choose your battlefield</p>
+    <button id="btn-size-14" class="start-btn">
+      14 × 14
+      <span class="sub">Quick Game · 12 pieces</span>
+    </button>
+    <button id="btn-size-20" class="start-btn">
+      20 × 20
+      <span class="sub">Standard · 21 pieces</span>
+    </button>
+    <button id="btn-size-24" class="start-btn">
+      24 × 24
+      <span class="sub">Deep Strategy · 28 pieces</span>
+    </button>
+    <button id="btn-size-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
+  <div id="order-select">
+    <h2>SELECT YOUR POSITION</h2>
+    <p>Each corner is a start position</p>
+    <button id="btn-order-0" class="order-btn">1st<span class="corner-label">Top-Left Corner</span></button>
+    <button id="btn-order-1" class="order-btn">2nd<span class="corner-label">Top-Right Corner</span></button>
+    <button id="btn-order-2" class="order-btn">3rd<span class="corner-label">Bottom-Right Corner</span></button>
+    <button id="btn-order-3" class="order-btn">4th<span class="corner-label">Bottom-Left Corner</span></button>
+    <button id="btn-order-back" class="order-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);margin-top:8px;">BACK</button>
+  </div>
+  <div id="char-select">
+    <h2>CHOOSE YOUR OPPONENTS</h2>
+    <p>Pick 3 CPU opponents (duplicates OK)</p>
+    <div class="char-slot-label" id="char-slot-label"></div>
+    <div class="char-grid" id="char-grid"></div>
+    <div style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
+      <button id="btn-char-back" class="order-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);width:auto;padding:10px 20px;">BACK</button>
+      <button class="order-btn" id="char-start-btn" style="background:transparent;border:1px solid #e94560;color:#e94560;width:auto;padding:10px 20px;display:none;">START!</button>
+    </div>
+  </div>
+  <div id="round-select" style="display:none;">
+    <h2>ROUNDS</h2>
+    <p>How many rounds?</p>
+    <button id="btn-round-3" class="start-btn">
+      3 ROUNDS
+      <span class="sub">Quick series</span>
+    </button>
+    <button id="btn-round-5" class="start-btn">
+      5 ROUNDS
+      <span class="sub">Standard series</span>
+    </button>
+    <button id="btn-round-10" class="start-btn">
+      10 ROUNDS
+      <span class="sub">Full series</span>
+    </button>
+    <button id="btn-round-back" class="start-btn" style="background:transparent;border-color:rgba(85,85,85,0.5);">BACK</button>
+  </div>
+
+</div>
+
+<!-- Game Screen -->
+<div id="app" style="display:none;">
+  <div id="header">
+    <h1>KADO</h1>
+    <span id="board-size-label" style="display:none;font-size:10px;color:#888;font-family:'Orbitron',sans-serif;"></span>
+    <span id="tetromino-progress" style="display:none;">0 / 80</span>
+    <span id="turn-indicator">● P1</span>
+    <span id="round-indicator"></span>
+    <button id="score-btn">SCORE</button>
+  </div>
+  <div id="stats-bar"></div>
+  <div id="board-container">
+    <div id="board-wrapper">
+      <canvas id="board"></canvas>
+      <div id="cpu-thinking">CPU THINKING...</div>
+      <div id="auto-pass-toast"><span class="pass-name"></span><br>No valid moves - AUTO PASS</div>
+      <div id="no-moves-toast"></div>
+    </div>
+  </div>
+  <div id="save-error-toast">Save failed - storage full</div>
+  <div id="color-selector"></div>
+  <div id="piece-panel">
+    <div id="piece-controls">
+      <button id="rotate-btn" class="icon-btn">↻</button>
+      <button id="flip-btn" class="icon-btn">↔</button>
+      <button id="deselect-btn">×</button>
+      <button id="undo-btn" disabled>UNDO</button>
+      <button id="pass-btn">PASS</button>
+      <button id="quit-btn">HOME</button>
+    </div>
+    <div id="viewing-label">← Viewing <span></span> pieces (tap to return)</div>
+    <div id="piece-list"></div>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h2 id="modal-title">SCORE</h2>
+    <div id="modal-body"></div>
+    <button id="modal-close-btn">CLOSE</button>
+    <button id="restart-btn" style="display:none;margin-left:8px;">TITLE</button>
+  </div>
+</div>
+
+<script src="../js/game-logic.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/tetromino.js"></script>
+<script>
+// GA4 Custom Event Tracking (Issue #112)
+(function() {
+  // Safe gtag wrapper
+  function trackEvent(eventName, params) {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, params || {});
+    }
+  }
+
+  // Game timer
+  var gameStartTime = 0;
+  function getElapsedSec() {
+    return gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
+  }
+
+  // --- STEP 1: Basic Events (6) ---
+
+  // 1. game_start
+  var origStartGame = window.startGame;
+  window.startGame = function(mode) {
+    gameStartTime = Date.now();
+    trackEvent('game_start', {
+      game_mode: mode,
+      board_size: selectedBoardSize
+    });
+    return origStartGame.apply(this, arguments);
+  };
+
+  // 2. game_end
+  var origEndGame = window.endGame;
+  window.endGame = function() {
+    var duration = getElapsedSec();
+    trackEvent('game_end', {
+      game_mode: state.gameMode,
+      board_size: state.BOARD_SIZE,
+      duration_sec: duration
+    });
+    return origEndGame.apply(this, arguments);
+  };
+
+  // 3. tutorial_start
+  var origStartTutorial = window.startTutorial;
+  window.startTutorial = function() {
+    trackEvent('tutorial_start');
+    return origStartTutorial.apply(this, arguments);
+  };
+
+  // 4. tutorial_complete
+  var origEndTutorial = window.endTutorial;
+  window.endTutorial = function() {
+    trackEvent('tutorial_complete', {
+      steps_completed: tutorialStep || 0
+    });
+    return origEndTutorial.apply(this, arguments);
+  };
+
+  // 5. mode_select
+  var origShowBoardSizeSelect = window.showBoardSizeSelect;
+  window.showBoardSizeSelect = function(mode) {
+    trackEvent('mode_select', { game_mode: mode });
+    return origShowBoardSizeSelect.apply(this, arguments);
+  };
+
+  // 6. board_size_select
+  var origConfirmBoardSize = window.confirmBoardSize;
+  window.confirmBoardSize = function(size) {
+    trackEvent('board_size_select', {
+      board_size: size,
+      game_mode: pendingGameMode
+    });
+    return origConfirmBoardSize.apply(this, arguments);
+  };
+
+  // --- STEP 2: Additional Events (5) ---
+
+  // 7. round_select
+  var origConfirmRounds = window.confirmRounds;
+  window.confirmRounds = function(rounds) {
+    trackEvent('round_select', { total_rounds: rounds });
+    return origConfirmRounds.apply(this, arguments);
+  };
+
+  // 8. character_select
+  var origConfirmCharSelect = window.confirmCharSelect;
+  window.confirmCharSelect = function() {
+    var names = (cpuCharacters || []).map(function(c) { return c ? c.name : 'unknown'; });
+    trackEvent('character_select', {
+      opponents: names.join(','),
+      opponent_count: names.length
+    });
+    return origConfirmCharSelect.apply(this, arguments);
+  };
+
+  // 9. puzzle_result (wrap endGame further to capture puzzle specifics)
+  var wrappedEndGame = window.endGame;
+  window.endGame = function() {
+    if (state.gameMode === 'puzzle') {
+      var allPlaced = state.playerPieces.every(function(pp) { return pp.every(function(p) { return p.used; }); });
+      var totalPieces = state.playerPieces.reduce(function(s, pp) { return s + pp.length; }, 0);
+      var placed = state.playerPieces.reduce(function(s, pp) { return s + pp.filter(function(p) { return p.used; }).length; }, 0);
+      trackEvent('puzzle_result', {
+        result: allPlaced ? 'clear' : 'failed',
+        board_size: state.BOARD_SIZE,
+        pieces_placed: placed,
+        pieces_total: totalPieces,
+        duration_sec: getElapsedSec()
+      });
+    }
+    return wrappedEndGame.apply(this, arguments);
+  };
+
+  // 10. series_complete
+  var origShowSeriesFinalResult = window.showSeriesFinalResult;
+  window.showSeriesFinalResult = function() {
+    var best = -999, winner = 0;
+    seriesScores.forEach(function(s, i) { if (s > best) { best = s; winner = i; } });
+    trackEvent('series_complete', {
+      total_rounds: totalRounds,
+      winner: players[winner].name,
+      is_player_winner: winner === state.humanPlayer,
+      scores: seriesScores.join(',')
+    });
+    return origShowSeriesFinalResult.apply(this, arguments);
+  };
+
+  // 11. game_resume
+  var origResumeGame = window.resumeGame;
+  window.resumeGame = function() {
+    gameStartTime = Date.now();
+    trackEvent('game_resume', {
+      game_mode: state.gameMode || 'unknown'
+    });
+    return origResumeGame.apply(this, arguments);
+  };
+})();
+</script>
+<div id="stats-overlay">
+  <div id="stats-modal">
+    <h2>RECORDS</h2>
+    <div id="stats-body"></div>
+    <button id="stats-close-btn" class="stats-close">CLOSE</button>
+    <button id="stats-reset-btn" class="stats-reset">RESET RECORDS</button>
+  </div>
+</div>
+
+<div id="tutorial-overlay">
+  <div id="tutorial-box">
+    <h2 id="tutorial-title"></h2>
+    <div id="tutorial-content"></div>
+    <button id="tutorial-next-btn">NEXT</button>
+  </div>
+</div>
+<div id="tutorial-hint"></div>
+
+<div id="puzzle-intro-overlay">
+  <div id="puzzle-intro-box">
+    <h2>PERFECT PLACE</h2>
+    <p id="puzzle-intro-size" style="text-align:center;color:#e94560;font-size:13px;margin-bottom:8px;font-family:'Orbitron',sans-serif;letter-spacing:1px;"></p>
+    <div id="puzzle-intro-content">
+      <h3>OBJECTIVE</h3>
+      <p>Place <b>all pieces of all 4 colors</b> on the board.</p>
+      <h3>RULES</h3>
+      <p>Standard 4-player rules apply. You control all 4 colors in turn order.</p>
+      <ul>
+        <li>Same-color pieces must connect <b>corner-to-corner</b></li>
+        <li>Same-color pieces must <b>never share an edge</b></li>
+        <li>Different colors <b>may</b> share edges</li>
+      </ul>
+    </div>
+    <button id="puzzle-intro-start-btn">START</button>
+  </div>
+</div>
+
+<div id="tetromino-intro-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:300;justify-content:center;align-items:center;">
+  <div id="puzzle-intro-box" style="pointer-events:auto;">
+    <h2>TETROMINO RECT</h2>
+    <p style="text-align:center;color:#e94560;font-size:13px;margin-bottom:8px;font-family:'Orbitron',sans-serif;letter-spacing:1px;">8 &times; 10 &mdash; 20 pieces</p>
+    <div>
+      <h3>OBJECTIVE</h3>
+      <p>Fill the <b>8 &times; 10 rectangle</b> completely using all 20 tetromino pieces.</p>
+      <h3>RULES</h3>
+      <ul>
+        <li>Same-color pieces must connect <b>corner-to-corner</b></li>
+        <li>Same-color pieces must <b>never share an edge</b></li>
+        <li>Different colors <b>may</b> share edges</li>
+        <li>First piece of each color can be placed <b>anywhere</b></li>
+      </ul>
+    </div>
+    <button id="tetromino-intro-start-btn" style="display:block;margin:16px auto 0;background:transparent;border:1px solid #e94560;color:#e94560;padding:10px 28px;border-radius:4px;font-size:14px;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:'Orbitron',sans-serif;">START</button>
+  </div>
+</div>
+
+<div id="clear-overlay">
+  <div id="clear-modal">
+    <h2>COMPLETE!</h2>
+    <div class="clear-time" id="clear-time"></div>
+    <div class="clear-msg">All pieces placed successfully!</div>
+    <button id="clear-title-btn">TITLE</button>
+  </div>
+</div>
+
+</body>
+</html>

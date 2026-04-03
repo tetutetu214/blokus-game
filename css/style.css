@@ -29,7 +29,7 @@ canvas#board { display: block; touch-action: none; }
 #piece-panel { height: 180px; min-height: 180px; background: #0d1528; border-top: 1px solid rgba(233,69,96,0.3); display: flex; flex-direction: column; }
 #piece-controls { display: flex; justify-content: center; gap: 12px; padding: 6px 0; }
 #piece-controls button { background: transparent; border: 1px solid rgba(233,69,96,0.3); color: #eee; border-radius: 4px; font-size: 16px; cursor: pointer; padding: 4px 10px; transition: all 0.2s; }
-#piece-controls button.icon-btn { width: 40px; height: 32px; padding: 0; }
+#piece-controls button.icon-btn { width: 44px; height: 44px; padding: 0; }
 #piece-controls button:hover:not(:disabled) { background: rgba(233,69,96,0.15); border-color: rgba(233,69,96,0.8); box-shadow: 0 0 15px rgba(233,69,96,0.3); }
 #piece-controls button:active:not(:disabled) { background: rgba(233,69,96,0.4); box-shadow: 0 0 20px rgba(233,69,96,0.5); }
 #piece-list { flex: 1; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; gap: 8px; padding: 4px 10px; -webkit-overflow-scrolling: touch; }

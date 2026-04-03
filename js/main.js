@@ -482,8 +482,8 @@ canvas.addEventListener('mousemove', (e) => {
   if (!currentShape || cpuThinking || state.gameOver) return;
   if (isCpuPlayer(state.currentPlayer)) return;
   const pos = getBoardCell(e.clientX, e.clientY);
-  const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
-  const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
+  const midR = Math.round(currentShape.reduce((sum, s) => sum + s[0], 0) / currentShape.length);
+  const midC = Math.round(currentShape.reduce((sum, s) => sum + s[1], 0) / currentShape.length);
   hoverPos = { r: pos.r - midR, c: pos.c - midC };
   drawBoard();
 });
@@ -521,8 +521,8 @@ canvas.addEventListener('touchmove', (e) => {
   if (isCpuPlayer(state.currentPlayer)) return;
   const touch = e.touches[0];
   const pos = getBoardCell(touch.clientX, touch.clientY);
-  const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
-  const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
+  const midR = Math.round(currentShape.reduce((sum, s) => sum + s[0], 0) / currentShape.length);
+  const midC = Math.round(currentShape.reduce((sum, s) => sum + s[1], 0) / currentShape.length);
   ghostPos = { r: pos.r - midR, c: pos.c - midC };
   drawBoard();
 }, { passive: false });
@@ -608,8 +608,8 @@ function handleBoardTap(pos) {
     return;
   }
 
-  const midR = Math.floor(Math.max(...currentShape.map(s => s[0])) / 2);
-  const midC = Math.floor(Math.max(...currentShape.map(s => s[1])) / 2);
+  const midR = Math.round(currentShape.reduce((sum, s) => sum + s[0], 0) / currentShape.length);
+  const midC = Math.round(currentShape.reduce((sum, s) => sum + s[1], 0) / currentShape.length);
   const br = pos.r - midR;
   const bc = pos.c - midC;
   if (canPlace(state.currentPlayer, currentShape, br, bc)) {

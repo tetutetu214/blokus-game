@@ -36,15 +36,15 @@ const PLAYERS_PUZZLE = [
 let cpuCharacters = [null, null, null];
 
 const CPU_CHARACTERS = [
-  { id: 'blaze',   rank: 1, name: 'BLAZE',   caption: 'Relentless force',  atk: 3, def: 1, rng: 0 },
-  { id: 'aegis',   rank: 2, name: 'AEGIS',   caption: 'Unbreakable wall',  atk: 1, def: 3, rng: 0 },
-  { id: 'chaos',   rank: 3, name: 'CHAOS',   caption: 'Brilliant madness', atk: 2, def: 2, rng: 3 },
-  { id: 'spike',   rank: 4, name: 'SPIKE',   caption: 'Sharp striker',     atk: 2, def: 1, rng: 0 },
-  { id: 'proxy',   rank: 5, name: 'PROXY',   caption: 'Steady shield',     atk: 1, def: 2, rng: 0 },
-  { id: 'glitch',  rank: 6, name: 'GLITCH',  caption: 'Unpredictable',     atk: 1, def: 1, rng: 2 },
-  { id: 'ember',   rank: 7, name: 'EMBER',   caption: 'Fading spark',      atk: 1, def: 0, rng: 0 },
-  { id: 'echo',    rank: 8, name: 'ECHO',    caption: 'Faint signal',      atk: 0, def: 1, rng: 0 },
-  { id: 'flicker', rank: 9, name: 'FLICKER', caption: 'Static noise',      atk: 0, def: 0, rng: 2 }
+  { id: 'blaze',   rank: 1, name: 'BLAZE',   caption: 'Relentless force',  atk: 5, def: 2, rng: 0 },
+  { id: 'aegis',   rank: 2, name: 'AEGIS',   caption: 'Unbreakable wall',  atk: 1, def: 5, rng: 0 },
+  { id: 'chaos',   rank: 3, name: 'CHAOS',   caption: 'Brilliant madness', atk: 3, def: 3, rng: 5 },
+  { id: 'spike',   rank: 4, name: 'SPIKE',   caption: 'Sharp striker',     atk: 4, def: 1, rng: 0 },
+  { id: 'proxy',   rank: 5, name: 'PROXY',   caption: 'Steady shield',     atk: 1, def: 4, rng: 0 },
+  { id: 'glitch',  rank: 6, name: 'GLITCH',  caption: 'Unpredictable',     atk: 2, def: 1, rng: 4 },
+  { id: 'ember',   rank: 7, name: 'EMBER',   caption: 'Fading spark',      atk: 3, def: 0, rng: 0 },
+  { id: 'echo',    rank: 8, name: 'ECHO',    caption: 'Faint signal',      atk: 0, def: 3, rng: 0 },
+  { id: 'flicker', rank: 9, name: 'FLICKER', caption: 'Static noise',      atk: 0, def: 0, rng: 3 }
 ];
 
 const CHAR_PIXELS = {
@@ -93,11 +93,11 @@ function getCpuParams(ch) {
   if (!ch) return { sizeWeight: 10, cornerWeight: 3, centerWeight: 2, blockWeight: 2, randomness: 3 };
   var a = ch.atk, d = ch.def, r = ch.rng;
   return {
-    sizeWeight:   4 + a * 5,
-    cornerWeight: 1 + Math.max(a, d) * 2,
-    centerWeight: 1 + a * 1.5,
-    blockWeight:  d * 4,
-    randomness:   r * 5
+    sizeWeight:   4 + a * 3,
+    cornerWeight: 1 + Math.max(a, d) * 1.2,
+    centerWeight: 1 + a * 0.9,
+    blockWeight:  d * 2.4,
+    randomness:   r * 3
   };
 }
 
@@ -1351,6 +1351,16 @@ function charSelectBack() {
   }
 }
 
+function buildStatBar(label, value) {
+  var filled = '';
+  var empty = '';
+  for (var i = 0; i < 5; i++) {
+    if (i < value) filled += '●';
+    else empty += '○';
+  }
+  return '<div class="char-stat-row"><span class="char-stat-label">' + label + '</span><span class="char-stat-dots"><span class="char-stat-filled">' + filled + '</span><span class="char-stat-empty">' + empty + '</span></span></div>';
+}
+
 function renderCharSelect() {
   const label = document.getElementById('char-slot-label');
   const slotNum = charSelectSlot + 1;
@@ -1378,10 +1388,42 @@ function renderCharSelect() {
     const info = document.createElement('div');
     info.className = 'char-info';
     info.innerHTML = '<span class="char-rank">Rank ' + ch.rank + '</span>' +
-      '<span class="char-name">' + ch.name + '</span>';
+      '<span class="char-name">' + ch.name + '</span>' +
+      '<span class="char-caption">' + ch.caption + '</span>';
     card.appendChild(info);
+    // Stat tooltip (shown on hover/tap)
+    const tooltip = document.createElement('div');
+    tooltip.className = 'char-tooltip';
+    tooltip.innerHTML = '<div class="char-tooltip-name">' + ch.name + '</div>' +
+      '<div class="char-tooltip-caption">"' + ch.caption + '"</div>' +
+      buildStatBar('ATK', ch.atk) +
+      buildStatBar('DEF', ch.def) +
+      buildStatBar('RNG', ch.rng);
+    card.appendChild(tooltip);
     drawCharPixelArt(cvs, ch.id);
-    card.onclick = function() { pickCharacter(i); };
+    // Long-press shows tooltip on mobile, short tap selects
+    var pressTimer = null;
+    var longPressed = false;
+    card.addEventListener('touchstart', function(e) {
+      longPressed = false;
+      pressTimer = setTimeout(function() {
+        longPressed = true;
+        tooltip.style.display = 'block';
+      }, 400);
+    }, { passive: true });
+    card.addEventListener('touchend', function(e) {
+      clearTimeout(pressTimer);
+      if (longPressed) {
+        tooltip.style.display = '';
+        longPressed = false;
+        e.preventDefault();
+      }
+    });
+    card.addEventListener('touchmove', function() {
+      clearTimeout(pressTimer);
+      tooltip.style.display = '';
+    }, { passive: true });
+    card.onclick = function() { if (!longPressed) pickCharacter(i); };
     grid.appendChild(card);
   });
 }
@@ -1412,7 +1454,11 @@ function pickCharacter(charIdx) {
       card.appendChild(cvs);
       const info = document.createElement('div');
       info.className = 'char-info';
-      info.innerHTML = '<span class="char-name">#' + pos + ' ' + ch.name + '</span>';
+      info.innerHTML = '<span class="char-name">#' + pos + ' ' + ch.name + '</span>' +
+        '<span class="char-caption">' + ch.caption + '</span>' +
+        buildStatBar('ATK', ch.atk) +
+        buildStatBar('DEF', ch.def) +
+        buildStatBar('RNG', ch.rng);
       card.appendChild(info);
       drawCharPixelArt(cvs, ch.id);
       grid.appendChild(card);

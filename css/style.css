@@ -104,6 +104,21 @@ canvas#board { display: block; touch-action: none; }
 #char-select .char-card .char-name { font-size: 13px; color: #eee; font-weight: bold; }
 #char-select .char-card .char-rank { font-size: 11px; color: #e94560; font-weight: bold; }
 #char-select .char-card .char-caption { font-size: 9px; color: #aaa; margin-top: 2px; }
+#char-select .char-card { position: relative; }
+#char-select .char-card .char-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: rgba(10,20,40,0.95); border: 1px solid rgba(233,69,96,0.6); border-radius: 6px; padding: 10px 12px; z-index: 100; white-space: nowrap; min-width: 140px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); pointer-events: none; }
+#char-select .char-card .char-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: rgba(233,69,96,0.6); }
+#char-select .char-card:hover .char-tooltip { display: block; }
+#char-select .char-card .char-tooltip-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 2px; }
+#char-select .char-card .char-tooltip-caption { font-size: 10px; color: #aaa; font-style: italic; margin-bottom: 6px; }
+#char-select .char-card .char-stat-row { display: flex; align-items: center; gap: 6px; font-size: 10px; line-height: 1.6; }
+#char-select .char-card .char-stat-label { color: #888; width: 28px; text-align: right; font-weight: bold; }
+#char-select .char-card .char-stat-dots { letter-spacing: 1px; }
+#char-select .char-card .char-stat-filled { color: #e94560; }
+#char-select .char-card .char-stat-empty { color: #333; }
+#char-select .char-card.selected .char-stat-row { font-size: 10px; line-height: 1.6; display: flex; align-items: center; gap: 6px; }
+#char-select .char-card.selected .char-stat-label { color: #888; width: 28px; text-align: right; font-weight: bold; }
+#char-select .char-card.selected .char-stat-filled { color: #e94560; }
+#char-select .char-card.selected .char-stat-empty { color: #333; }
 .order-btn { background: transparent; border: 1px solid rgba(233,69,96,0.3); color: #eee; padding: 12px 24px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 220px; text-align: center; touch-action: manipulation; letter-spacing: 1px; transition: all 0.2s; }
 .order-btn:hover { background: rgba(233,69,96,0.15); border-color: rgba(233,69,96,0.8); box-shadow: 0 0 20px rgba(233,69,96,0.3); }
 .order-btn:active { background: rgba(233,69,96,0.3); border-color: #e94560; box-shadow: 0 0 25px rgba(233,69,96,0.5); }

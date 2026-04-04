@@ -200,3 +200,11 @@ canvas#board { display: block; touch-action: none; }
 
 /* Tetromino mode: no-moves toast */
 #no-moves-toast { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(180,40,60,0.95); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 13px; z-index: 60; text-align: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; animation: fadeInOut 2.5s ease-in-out; pointer-events: none; }
+
+/* CPU character breathing animations */
+@keyframes charBreathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes charBreatheIrregular { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-2px); } 60% { transform: translateY(-3px); } 80% { transform: translateY(-1px); } }
+.char-breathe-atk { animation: charBreathe 1.5s ease-in-out infinite; }
+.char-breathe-def { animation: charBreathe 2.5s ease-in-out infinite; }
+.char-breathe-rng { animation: charBreatheIrregular 2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .char-breathe-atk, .char-breathe-def, .char-breathe-rng { animation: none; } }

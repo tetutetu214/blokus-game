@@ -71,6 +71,14 @@ const CHAR_PALETTES = {
   flicker: ['#665500', '#887733', '#aa9955']
 };
 
+function getCharBreatheClass(charId) {
+  var ch = CPU_CHARACTERS.find(function(c) { return c.id === charId; });
+  if (!ch) return 'char-breathe-def';
+  if (ch.rng >= 3) return 'char-breathe-rng';
+  if (ch.atk >= ch.def) return 'char-breathe-atk';
+  return 'char-breathe-def';
+}
+
 function drawCharPixelArt(canvas, charId) {
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 16, 16);
@@ -781,6 +789,7 @@ function updateStatsBar() {
       const cvs = document.createElement('canvas');
       cvs.width = 16; cvs.height = 16;
       cvs.style.cssText = 'width:14px;height:14px;image-rendering:pixelated;';
+      cvs.className = getCharBreatheClass(ch.id);
       drawCharPixelArt(cvs, ch.id);
       nameRow.appendChild(cvs);
     }
@@ -1006,11 +1015,26 @@ function showSingleGameResult() {
   ranked.forEach((r, pos) => {
     const row = document.createElement('div');
     row.className = 'score-row';
+    row.style.alignItems = 'center';
     const isMe = (state.gameMode === 'cpu' && r.idx === state.humanPlayer);
     const rankLabel = '#' + (pos + 1);
-    const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
-    const scoreHtml = `<span>${r.score}pts</span>`;
-    row.innerHTML = nameHtml + scoreHtml;
+    const nameSpanEl = document.createElement('span');
+    nameSpanEl.style.cssText = 'display:flex;align-items:center;gap:4px;color:' + r.player.color;
+    // Add character sprite for CPU players in results
+    const rCh = (state.gameMode === 'cpu' && r.idx !== state.humanPlayer) ? getCpuCharacter(r.idx) : null;
+    if (rCh && CHAR_PIXELS[rCh.id]) {
+      const rCvs = document.createElement('canvas');
+      rCvs.width = 16; rCvs.height = 16;
+      rCvs.style.cssText = 'width:16px;height:16px;image-rendering:pixelated;';
+      rCvs.className = getCharBreatheClass(rCh.id);
+      drawCharPixelArt(rCvs, rCh.id);
+      nameSpanEl.appendChild(rCvs);
+    }
+    nameSpanEl.appendChild(document.createTextNode(rankLabel + ' ' + r.player.name));
+    const scoreSpanEl = document.createElement('span');
+    scoreSpanEl.textContent = r.score + 'pts';
+    row.appendChild(nameSpanEl);
+    row.appendChild(scoreSpanEl);
     if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
     div.appendChild(row);
   });
@@ -1043,12 +1067,26 @@ function showRoundResult() {
   ranked.forEach((r, pos) => {
     const row = document.createElement('div');
     row.className = 'score-row';
+    row.style.alignItems = 'center';
     const isMe = (r.idx === state.humanPlayer);
     const rankLabel = '#' + (pos + 1);
-    const nameHtml = `<span style="color:${r.player.color}">${rankLabel} ${r.player.name}</span>`;
-    const scoreHtml = `<span>${r.score}pts</span>`;
-    row.innerHTML = nameHtml + scoreHtml;
-    if (isMe) row.style.cssText = 'font-size:17px;font-weight:bold;';
+    const rnSpan = document.createElement('span');
+    rnSpan.style.cssText = 'display:flex;align-items:center;gap:4px;color:' + r.player.color;
+    const rnCh = (state.gameMode === 'cpu' && r.idx !== state.humanPlayer) ? getCpuCharacter(r.idx) : null;
+    if (rnCh && CHAR_PIXELS[rnCh.id]) {
+      const rnCvs = document.createElement('canvas');
+      rnCvs.width = 16; rnCvs.height = 16;
+      rnCvs.style.cssText = 'width:16px;height:16px;image-rendering:pixelated;';
+      rnCvs.className = getCharBreatheClass(rnCh.id);
+      drawCharPixelArt(rnCvs, rnCh.id);
+      rnSpan.appendChild(rnCvs);
+    }
+    rnSpan.appendChild(document.createTextNode(rankLabel + ' ' + r.player.name));
+    const rnScore = document.createElement('span');
+    rnScore.textContent = r.score + 'pts';
+    row.appendChild(rnSpan);
+    row.appendChild(rnScore);
+    if (isMe) row.style.cssText += 'font-size:17px;font-weight:bold;';
     div.appendChild(row);
   });
   body.appendChild(div);
@@ -1407,6 +1445,7 @@ function renderCharSelect() {
     const cvs = document.createElement('canvas');
     cvs.width = 16; cvs.height = 16;
     cvs.style.cssText = 'image-rendering:pixelated;width:40px;height:40px;';
+    cvs.className = getCharBreatheClass(ch.id);
     card.appendChild(cvs);
     const info = document.createElement('div');
     info.className = 'char-info';
@@ -1731,6 +1770,7 @@ function buildCharGrid(stats) {
     var cvs = document.createElement('canvas');
     cvs.width = 16; cvs.height = 16;
     cvs.style.cssText = 'width:20px;height:20px;image-rendering:pixelated;display:block;margin:0 auto 2px;';
+    cvs.className = getCharBreatheClass(ch.id);
     drawCharPixelArt(cvs, ch.id);
     cell.appendChild(cvs);
     var nameEl = document.createElement('div');

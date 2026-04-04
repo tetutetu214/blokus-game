@@ -686,22 +686,32 @@ var tetrominoMode = false;
   };
 
   // ===== Event Listeners =====
-  document.getElementById('tetromino-intro-start-btn').addEventListener('click', function() {
-    document.getElementById('tetromino-intro-overlay').style.display = 'none';
-    initTetromino();
-  });
-  document.getElementById('tetromino-intro-overlay').addEventListener('click', function() {}); // prevent click-through
-  document.getElementById('tetromino-intro-box').addEventListener('click', function(e) { e.stopPropagation(); });
+  // Overlay elements are placed after <script> tags in the HTML,
+  // so we must wait for DOMContentLoaded before accessing them.
+  function setupTetrominoListeners() {
+    document.getElementById('tetromino-intro-start-btn').addEventListener('click', function() {
+      document.getElementById('tetromino-intro-overlay').style.display = 'none';
+      initTetromino();
+    });
+    document.getElementById('tetromino-intro-overlay').addEventListener('click', function() {}); // prevent click-through
+    document.getElementById('tetromino-intro-box').addEventListener('click', function(e) { e.stopPropagation(); });
 
-  document.getElementById('clear-title-btn').addEventListener('click', function() {
-    document.getElementById('clear-overlay').classList.remove('show');
-    quitToTitle();
-  });
+    document.getElementById('clear-title-btn').addEventListener('click', function() {
+      document.getElementById('clear-overlay').classList.remove('show');
+      quitToTitle();
+    });
 
-  // Menu button: start tetromino mode
-  document.getElementById('btn-tetromino').addEventListener('click', function() {
-    document.getElementById('puzzle-menu').style.display = 'none';
-    window.startTetrominoMode();
-  });
+    // Menu button: start tetromino mode
+    document.getElementById('btn-tetromino').addEventListener('click', function() {
+      document.getElementById('puzzle-menu').style.display = 'none';
+      window.startTetrominoMode();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTetrominoListeners);
+  } else {
+    setupTetrominoListeners();
+  }
 
 })();

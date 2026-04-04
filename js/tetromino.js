@@ -691,6 +691,7 @@ var tetrominoMode = false;
     initTetromino();
   });
   document.getElementById('tetromino-intro-overlay').addEventListener('click', function() {}); // prevent click-through
+  document.getElementById('tetromino-intro-box').addEventListener('click', function(e) { e.stopPropagation(); });
 
   document.getElementById('clear-title-btn').addEventListener('click', function() {
     document.getElementById('clear-overlay').classList.remove('show');

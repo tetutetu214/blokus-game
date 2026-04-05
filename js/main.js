@@ -800,7 +800,7 @@ function updateStatsBar() {
     nameRow.appendChild(nameSpan);
     const valueSpan = document.createElement('div');
     valueSpan.className = 'stat-value';
-    valueSpan.textContent = remaining + 'pcs / ' + remainingSquares + 'sq';
+    valueSpan.textContent = String(remaining).padStart(2, '\u2007') + 'pcs / ' + String(remainingSquares).padStart(2, '\u2007') + 'sq';
     div.appendChild(nameRow);
     div.appendChild(valueSpan);
     div.onclick = () => toggleViewPlayer(i);

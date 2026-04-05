@@ -36,496 +36,42 @@ const PLAYERS_PUZZLE = [
 let cpuCharacters = [null, null, null];
 
 const CPU_CHARACTERS = [
-  { id: 'blaze',   rank: 1, name: 'BLAZE',   caption: 'Inferno Dragon',    atk: 5, def: 2, rng: 0 },
-  { id: 'aegis',   rank: 2, name: 'AEGIS',   caption: 'Blue Gigantos',     atk: 1, def: 5, rng: 0 },
-  { id: 'chaos',   rank: 3, name: 'CHAOS',   caption: 'Thunder God',       atk: 3, def: 3, rng: 5 },
-  { id: 'spike',   rank: 4, name: 'SPIKE',   caption: 'Flame Beast',       atk: 4, def: 1, rng: 0 },
-  { id: 'proxy',   rank: 5, name: 'PROXY',   caption: 'Tidal Guardian',    atk: 1, def: 4, rng: 0 },
-  { id: 'glitch',  rank: 6, name: 'GLITCH',  caption: 'Storm Spirit',      atk: 2, def: 1, rng: 4 },
-  { id: 'ember',   rank: 7, name: 'EMBER',   caption: 'Fire Wolf',         atk: 3, def: 0, rng: 0 },
-  { id: 'echo',    rank: 8, name: 'ECHO',    caption: 'Water Spirit',      atk: 0, def: 3, rng: 0 },
-  { id: 'flicker', rank: 9, name: 'FLICKER', caption: 'Spark Sprite',      atk: 0, def: 0, rng: 3 }
+  { id: 'blaze',   rank: 1, name: 'BLAZE',   caption: 'Inferno Hydra',     atk: 5, def: 2, rng: 0 },
+  { id: 'aegis',   rank: 2, name: 'AEGIS',   caption: 'Leviathan Kraken',  atk: 1, def: 5, rng: 0 },
+  { id: 'chaos',   rank: 3, name: 'CHAOS',   caption: 'Thunder Archon',    atk: 3, def: 3, rng: 5 },
+  { id: 'spike',   rank: 4, name: 'SPIKE',   caption: 'Plasma Raptor',     atk: 4, def: 1, rng: 0 },
+  { id: 'proxy',   rank: 5, name: 'PROXY',   caption: 'Aqua Serpent',      atk: 1, def: 4, rng: 0 },
+  { id: 'glitch',  rank: 6, name: 'GLITCH',  caption: 'Volt Stalker',      atk: 2, def: 1, rng: 4 },
+  { id: 'ember',   rank: 7, name: 'EMBER',   caption: 'Cinder Imp',        atk: 3, def: 0, rng: 0 },
+  { id: 'echo',    rank: 8, name: 'ECHO',    caption: 'Hydro Wisp',        atk: 0, def: 3, rng: 0 },
+  { id: 'flicker', rank: 9, name: 'FLICKER', caption: 'Spark Mite',        atk: 0, def: 0, rng: 3 }
 ];
 
-// 32x32 pixel art data (0=transparent, 1-8=palette colors)
-// Parsed into 2D arrays at init time
-var CHAR_PIXEL_STRINGS = {
-blaze: [ // Inferno Dragon - front-facing, wings spread, horned
-"00000000000000000000000000000000",
-"00000100000000000000000010000000",
-"00000120000000000000000210000000",
-"00000123000001110000032100000000",
-"00000012310012321001321000000000",
-"00000001321123432112310000000000",
-"00000001234345454343100000000000",
-"00000001234585585431000000000000",
-"00100001234554455431000001000000",
-"01210001234543345431000012100000",
-"12321001234321123431000123210000",
-"13432101234210012341001234310000",
-"12343212341000000134212343210000",
-"01234323410000000001343432100000",
-"00123434100000000000134321000000",
-"00012343100001110000013210000000",
-"00001232100012321000012100000000",
-"00000121000123432100001000000000",
-"00000000001234543210000000000000",
-"00000000012345654321000000000000",
-"00000000012345654321000000000000",
-"00000000012345554321000000000000",
-"00000000001234543210000000000000",
-"00000000001234443210000000000000",
-"00000000001233332100000000000000",
-"00000000012321012321000000000000",
-"00000000123210001232100000000000",
-"00000001232100000123210000000000",
-"00000001321000000001321000000000",
-"00000011110000000001111000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-spike: [ // Flame Beast - front-facing, horned armored creature
-"00000000000000000000000000000000",
-"00001000000000000000000010000000",
-"00012100000000000000001210000000",
-"00012100000011110000001210000000",
-"00001210001234432100012100000000",
-"00000121012345543210121000000000",
-"00000012123456654321210000000000",
-"00000001234587854321000000000000",
-"00000001234565654321000000000000",
-"00000001234543434321000000000000",
-"00000000123432123432100000000000",
-"00000000012321012321000000000000",
-"00000000001210001210000000000000",
-"00000000012321012321000000000000",
-"00000000123432123432100000000000",
-"00000001234543234543210000000000",
-"00000012345654345654321000000000",
-"00000123456654456654321000000000",
-"00000123456654456654321000000000",
-"00000123456654456654321000000000",
-"00000012345654345654321000000000",
-"00000012345543234554321000000000",
-"00000001234432123443210000000000",
-"00000001234321012343210000000000",
-"00000001234321012343210000000000",
-"00000001234210001234210000000000",
-"00000001232100000123210000000000",
-"00000012321000000012321000000000",
-"00000013210000000001321000000000",
-"00000011100000000001110000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-ember: [ // Fire Wolf - side-facing right, flame mane
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000110000000000",
-"00000000000000000001321000000000",
-"00000000000000000013432100000000",
-"00000000000000000013483210000000",
-"00000000000000000134554310000000",
-"00000000000000001345654310000000",
-"00000000000000001345543100000000",
-"00000000000000013454321000000000",
-"00000000000001234565432100000000",
-"00000000000012345676543210000000",
-"00001100000123456776543210000000",
-"00012310001234567776543100000000",
-"00001231012345677654321000000000",
-"00000123123456665432100000000000",
-"00000012234565543210000000000000",
-"00000001234554432100000000000000",
-"00000001234543210000000000000000",
-"00000001234321000000000000000000",
-"00000001342101321000000000000000",
-"00000001321001321000000000000000",
-"00000001210001210000000000000000",
-"00000001100001100000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-aegis: [ // Blue Gigantos - front-facing, massive muscular
-"00000000000000000000000000000000",
-"00000000000001111000000000000000",
-"00000000000013543100000000000000",
-"00000000000134878310000000000000",
-"00000000000134555310000000000000",
-"00000000000013443100000000000000",
-"00000000000012332100000000000000",
-"00000000000123443210000000000000",
-"00000011101234554321011100000000",
-"00000134312345665432134310000000",
-"00001345434567776543454310000000",
-"00013456545678887654565431000000",
-"00134565456788887654565431000000",
-"00134565456787876545654310000000",
-"00013456545677765434565310000000",
-"00001345434566654323454310000000",
-"00000134312345543212343100000000",
-"00000013431234543210134300000000",
-"00000013431234543210134300000000",
-"00000013431234543210134300000000",
-"00000013431234543210134300000000",
-"00000013421233432101134300000000",
-"00000012310123432100123100000000",
-"00000000001234543210000000000000",
-"00000000001234554321000000000000",
-"00000000012345554321000000000000",
-"00000000012344344321000000000000",
-"00000000123431013432100000000000",
-"00000001234310001343210000000000",
-"00000001343100000134310000000000",
-"00000001111000000011110000000000",
-"00000000000000000000000000000000"],
-proxy: [ // Tidal Guardian - front-facing, turtle with patterned shell
-"00000000000000000000000000000000",
-"00000000001111111110000000000000",
-"00000000013456654310000000000000",
-"00000000134565565431000000000000",
-"00000001345645546543100000000000",
-"00000013456534345654310000000000",
-"00000134565643436565431000000000",
-"00000134564534345465431000000000",
-"00000013456545454654310000000000",
-"00000001345656565431000000000000",
-"00000000134565654310000000000000",
-"00000000013455543100000000000000",
-"00000000001344431000000000000000",
-"00000000001233321000000000000000",
-"00001100000123210000001100000000",
-"00012310001234321000012310000000",
-"00012321012343343210123210000000",
-"00001232123487843212321000000000",
-"00000123234356534323210000000000",
-"00000012343234232343210000000000",
-"00000001234321012343210000000000",
-"00000000123210001232100000000000",
-"00000000012321012321000000000000",
-"00000000012343234321000000000000",
-"00000000012345454321000000000000",
-"00000000001234543100000000000000",
-"00000000001234543100000000000000",
-"00000000012321012321000000000000",
-"00000000123210001232100000000000",
-"00000000111000000011100000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-echo: [ // Water Spirit - front-facing, teardrop with tentacles
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000100000000000000000",
-"00000000000001210000000000000000",
-"00000000000013431000000000000000",
-"00000000000134543100000000000000",
-"00000000001345654310000000000000",
-"00000000013456765431000000000000",
-"00000000134567876543100000000000",
-"00000000134578877543100000000000",
-"00000001345688886543100000000000",
-"00000001345688886543100000000000",
-"00000001345678876543100000000000",
-"00000000134567765431000000000000",
-"00000000013456654310000000000000",
-"00000000001345543100000000000000",
-"00000000000134431000000000000000",
-"00000000000013310000000000000000",
-"00000000001001210010000000000000",
-"00000000013000120031000000000000",
-"00000000013000120031000000000000",
-"00000000001300120130000000000000",
-"00000000000130121300000000000000",
-"00000000000013310000000000000000",
-"00000000000001100000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-chaos: [ // Thunder God - front-facing, crowned divine figure
-"00000000000000000000000000000000",
-"00000000000060806000000000000000",
-"00000000000678887600000000000000",
-"00000000001345654310000000000000",
-"00000000001358885310000000000000",
-"00000000001345654310000000000000",
-"00000000000134543100000000000000",
-"00000000000013431000000000000000",
-"00000000000123432100000000000000",
-"00600001101234543211000006000000",
-"00060012312345654321321006000000",
-"00006123423456765432342160000000",
-"00000134534567876545345310000000",
-"00600123434567876543234310060000",
-"00060012323456765432323100600000",
-"00006001212345654321212006000000",
-"00000000012345654321000000000000",
-"00000000123456765432100000000000",
-"00000000123456765432100000000000",
-"00060000123456765432100000600000",
-"00006000123456765432100006000000",
-"00000600012345654321000060000000",
-"00000060012345654321000600000000",
-"00000006001234543210006000000000",
-"00000000001234543210000000000000",
-"00000000001234443210000000000000",
-"00000000001233332100000000000000",
-"00000000012321012321000000000000",
-"00000000012310001321000000000000",
-"00000000011100000111000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-glitch: [ // Storm Spirit - front-facing, electric ghost
-"00000000000000000000000000000000",
-"00000000000006060000000000000000",
-"00000000000060006000000000000000",
-"00000000000666666000000000000000",
-"00000000001345543100000000000000",
-"00000000013456654310000000000000",
-"00006000134587854310000600000000",
-"00000601345656654310060000000000",
-"00000001345654454310000000000000",
-"00000001345543345310000000000000",
-"00000000134432234310000000000000",
-"00000600013432134300000060000000",
-"00006000001343134300000600000000",
-"00000000001343134300000000000000",
-"00060000001343134300000060000000",
-"00000600012343234310006000000000",
-"00000060012345345310060000000000",
-"00000006013456456310600000000000",
-"00000000013456456310000000000000",
-"00006000012345345210000600000000",
-"00000600001234234100006000000000",
-"00000060000123231000060000000000",
-"00000006000012310000600000000000",
-"00000000000012310000000000000000",
-"00000000000123321000000000000000",
-"00000000000121012000000000000000",
-"00000000000100001000000000000000",
-"00000000000000000000000000000000",
-"00000000000060006000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"],
-flicker: [ // Spark Sprite - front-facing, tiny fairy with wings
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000006060000000000000000",
-"00000000000060006000000000000000",
-"00000000000006060000000000000000",
-"00000000000013431000000000000000",
-"00000000000134543100000000000000",
-"00000000001345854310000000000000",
-"00000000001345854310000000000000",
-"00000060001345654310000600000000",
-"00001600013456765431000016000000",
-"00016300134567876543100031600000",
-"00160310134567876543100103016000",
-"00016300013456765431000031600000",
-"00001600001345654310000016000000",
-"00000060000134543100000600000000",
-"00000000000134543100000000000000",
-"00000000000013431000000000000000",
-"00000000000012321000000000000000",
-"00000000000012321000000000000000",
-"00000000000013431000000000000000",
-"00000000000012321000000000000000",
-"00000000000001210000000000000000",
-"00000000000012021000000000000000",
-"00000000000010001000000000000000",
-"00000000000000000000000000000000",
-"00000000000060006000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000",
-"00000000000000000000000000000000"]
-};
-
-var CHAR_PIXELS = {};
-Object.keys(CHAR_PIXEL_STRINGS).forEach(function(id) {
-  CHAR_PIXELS[id] = CHAR_PIXEL_STRINGS[id].map(function(row) {
-    return row.split('').map(Number);
-  });
-});
-
-const CHAR_PALETTES = {
-  // Fire column (ATK) - 8 color red/orange palette
-  blaze:   ['#220000','#551111','#882222','#bb3333','#dd5522','#ff8833','#ffcc44','#ffffff'],
-  spike:   ['#220000','#441100','#773311','#aa4422','#cc5533','#ee7744','#ffaa55','#ffddaa'],
-  ember:   ['#110000','#331100','#552211','#773322','#994433','#bb6644','#dd8855','#ffbb88'],
-  // Water column (DEF) - 8 color blue/cyan palette
-  aegis:   ['#000022','#001144','#002277','#0044aa','#1166cc','#3399ee','#66ccff','#ffffff'],
-  proxy:   ['#000022','#001133','#002255','#003388','#0055aa','#2277cc','#44aaee','#99ddff'],
-  echo:    ['#000011','#001133','#002244','#003366','#114477','#336699','#5599bb','#88ccee'],
-  // Lightning column (RNG) - 8 color yellow/gold palette
-  chaos:   ['#111100','#332200','#554400','#887700','#bbaa00','#ddcc22','#ffee44','#ffffff'],
-  glitch:  ['#111100','#332200','#443300','#665500','#998800','#bbaa22','#ddcc44','#ffee88'],
-  flicker: ['#111100','#221100','#443300','#554400','#776600','#998822','#bbaa44','#ddcc88']
+// Character image paths (PNG sprites)
+var CHAR_IMAGES = {
+  blaze:   'img/Tier1_ATK.png',
+  aegis:   'img/Tier1_DEF.png',
+  chaos:   'img/Tier1_RANDOM.png',
+  spike:   'img/Tier2_ATK.png',
+  proxy:   'img/Tier2_DEF.png',
+  glitch:  'img/Tier2_RANDOM.png',
+  ember:   'img/Tier3_ATK.png',
+  echo:    'img/Tier3_DEF.png',
+  flicker: 'img/Tier3_RANDOM.png'
 };
 
 function getCharBreatheClass(charId) {
   return 'char-anim-' + charId;
 }
 
-function drawCharPixelArt(canvas, charId) {
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, 32, 32);
-  var px = CHAR_PIXELS[charId];
-  var pal = CHAR_PALETTES[charId];
-  if (!px || !pal) return;
-  for (var y = 0; y < 32; y++) {
-    for (var x = 0; x < 32; x++) {
-      var v = px[y][x];
-      if (v >= 1 && v <= 8) {
-        ctx.fillStyle = pal[v - 1];
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
-  }
-}
-
-// === Character Action Effects (canvas-based animations) ===
-var activeEffectCanvases = [];
-
-function stopAllCharEffects() {
-  activeEffectCanvases.forEach(function(c) {
-    if (c._effectTimer) { clearInterval(c._effectTimer); c._effectTimer = null; }
-  });
-  activeEffectCanvases = [];
-}
-
-function startCharActionEffect(canvas, charId) {
-  if (canvas._effectTimer) clearInterval(canvas._effectTimer);
-  var frame = 0;
-  canvas._effectTimer = setInterval(function() {
-    drawCharPixelArt(canvas, charId);
-    var ctx = canvas.getContext('2d');
-    frame = (frame + 1) % 60;
-    drawCharActionFrame(ctx, charId, frame);
-  }, 130);
-  activeEffectCanvases.push(canvas);
-}
-
-function drawCharActionFrame(ctx, charId, frame) {
-  switch(charId) {
-    case 'blaze': // Dragon fire breath from mouth
-      if (frame >= 15 && frame < 32) {
-        var t = frame - 15;
-        var fc = ['#ff4400','#ff8800','#ffcc00','#ffee66'];
-        for (var i = 0; i < 5; i++) {
-          var fx = 22 + Math.floor(t / 3) + i;
-          var fy = 8 + Math.floor(Math.sin((t + i * 2) * 0.8) * 4);
-          if (fx >= 0 && fx < 32 && fy >= 0 && fy < 32) {
-            ctx.fillStyle = fc[(t + i) % fc.length];
-            ctx.fillRect(fx, fy, 1, 1);
-          }
-        }
-      }
-      break;
-    case 'spike': // Claw slash sparks
-      if (frame >= 30 && frame < 42) {
-        var t = frame - 30;
-        ctx.fillStyle = '#ff6633';
-        if (t < 8) {
-          ctx.fillRect(22 + Math.floor(t / 2), 8 + t, 1, 1);
-          ctx.fillRect(23 + Math.floor(t / 2), 9 + t, 1, 1);
-        }
-        ctx.fillStyle = '#ffaa44';
-        if (t >= 2 && t < 10) {
-          ctx.fillRect(21 + Math.floor(t / 2), 7 + t, 1, 1);
-        }
-      }
-      break;
-    case 'ember': // Fire particles above head (howl)
-      if (frame % 8 < 5) {
-        var fc = ['#882211','#bb4433','#dd7755'];
-        for (var i = 0; i < 3; i++) {
-          var px = 14 + Math.floor(Math.random() * 10);
-          var py = Math.floor(Math.random() * 5);
-          ctx.fillStyle = fc[Math.floor(Math.random() * 3)];
-          ctx.fillRect(px, py, 1, 1);
-        }
-      }
-      break;
-    case 'aegis': // Ground stomp shockwave
-      if (frame >= 25 && frame < 37) {
-        var t = frame - 25;
-        ctx.fillStyle = t < 6 ? '#55bbff' : '#2288ff';
-        var w = 2 + Math.floor(t * 1.2);
-        for (var dx = -w; dx <= w; dx++) {
-          var px = 16 + dx;
-          if (px >= 0 && px < 32) ctx.fillRect(px, 31, 1, 1);
-        }
-      }
-      break;
-    case 'proxy': // Water shield pulse
-      if (frame % 25 < 12) {
-        var t = (frame % 25) / 12;
-        ctx.fillStyle = t < 0.5 ? '#3399ee' : '#1166cc';
-        var r = 8 + Math.floor(t * 6);
-        for (var a = 0; a < 12; a++) {
-          var ax = 16 + Math.round(Math.cos(a * Math.PI / 6) * r);
-          var ay = 8 + Math.round(Math.sin(a * Math.PI / 6) * r);
-          if (ax >= 0 && ax < 32 && ay >= 0 && ay < 32) ctx.fillRect(ax, ay, 1, 1);
-        }
-      }
-      break;
-    case 'echo': // Water ripple rings below
-      if (frame % 18 < 12) {
-        var t = (frame % 18) / 18;
-        ctx.fillStyle = t < 0.3 ? '#4488cc' : '#225599';
-        var rr = 2 + Math.floor(t * 8);
-        for (var dx = -rr; dx <= rr; dx++) {
-          var px = 15 + dx;
-          if (px >= 0 && px < 32) ctx.fillRect(px, 28, 1, 1);
-        }
-      }
-      break;
-    case 'chaos': // Lightning bolt flash
-      if (frame >= 8 && frame < 16) {
-        ctx.fillStyle = '#ffffff';
-        var bx = frame < 12 ? 3 : 28;
-        for (var j = 0; j < 8; j++) {
-          var lx = bx + (j % 2 === 0 ? 0 : 1);
-          if (lx >= 0 && lx < 32) ctx.fillRect(lx, 2 + j, 1, 1);
-        }
-      }
-      if (frame >= 38 && frame < 46) {
-        ctx.fillStyle = '#ffee00';
-        var bx = frame < 42 ? 28 : 3;
-        for (var j = 0; j < 8; j++) {
-          var lx = bx - (j % 2 === 0 ? 0 : 1);
-          if (lx >= 0 && lx < 32) ctx.fillRect(lx, 12 + j, 1, 1);
-        }
-      }
-      break;
-    case 'glitch': // Static noise / scan lines
-      if (frame % 6 === 0) {
-        for (var i = 0; i < 8; i++) {
-          ctx.fillStyle = Math.random() > 0.5 ? '#ffdd44' : '#ffffff';
-          ctx.fillRect(Math.floor(Math.random() * 32), Math.floor(Math.random() * 32), 1, 1);
-        }
-      }
-      break;
-    case 'flicker': // Random sparkle dots
-      if (frame % 5 === 0) {
-        ctx.fillStyle = '#ffee88';
-        ctx.fillRect(Math.floor(Math.random() * 32), Math.floor(Math.random() * 32), 1, 1);
-        ctx.fillStyle = '#ddcc55';
-        ctx.fillRect(Math.floor(Math.random() * 32), Math.floor(Math.random() * 32), 1, 1);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(Math.floor(Math.random() * 32), Math.floor(Math.random() * 32), 1, 1);
-      }
-      break;
-  }
+// Create character image element
+function createCharImg(charId, size) {
+  var img = document.createElement('img');
+  img.src = CHAR_IMAGES[charId];
+  img.alt = charId;
+  img.style.cssText = 'width:' + size + 'px;height:' + size + 'px;object-fit:contain;';
+  img.className = getCharBreatheClass(charId);
+  return img;
 }
 
 // Generate AI params from character atk/def/rng values
@@ -1234,15 +780,10 @@ function updateStatsBar() {
       rankBadge.textContent = '#' + rankMap[i];
       nameRow.appendChild(rankBadge);
     }
-    // Add pixel art for CPU characters
+    // Add character image for CPU players
     const ch = (state.gameMode === 'cpu' && i !== state.humanPlayer) ? getCpuCharacter(i) : null;
-    if (ch && CHAR_PIXELS[ch.id]) {
-      const cvs = document.createElement('canvas');
-      cvs.width = 32; cvs.height = 32;
-      cvs.style.cssText = 'width:14px;height:14px;image-rendering:pixelated;';
-      cvs.className = getCharBreatheClass(ch.id);
-      drawCharPixelArt(cvs, ch.id);
-      nameRow.appendChild(cvs);
+    if (ch && CHAR_IMAGES[ch.id]) {
+      nameRow.appendChild(createCharImg(ch.id, 14));
     }
     const nameSpan = document.createElement('span');
     nameSpan.className = 'stat-name';
@@ -1477,13 +1018,8 @@ function showSingleGameResult() {
     nameSpanEl.appendChild(rankSpanEl);
     // Add character sprite for CPU players in results
     const rCh = (state.gameMode === 'cpu' && r.idx !== state.humanPlayer) ? getCpuCharacter(r.idx) : null;
-    if (rCh && CHAR_PIXELS[rCh.id]) {
-      const rCvs = document.createElement('canvas');
-      rCvs.width = 32; rCvs.height = 32;
-      rCvs.style.cssText = 'width:16px;height:16px;image-rendering:pixelated;';
-      rCvs.className = getCharBreatheClass(rCh.id);
-      drawCharPixelArt(rCvs, rCh.id);
-      nameSpanEl.appendChild(rCvs);
+    if (rCh && CHAR_IMAGES[rCh.id]) {
+      nameSpanEl.appendChild(createCharImg(rCh.id, 16));
     }
     const nameTextEl = document.createElement('span');
     nameTextEl.textContent = r.player.name;
@@ -1535,13 +1071,8 @@ function showRoundResult() {
     rnRank.style.color = '#fff';
     rnSpan.appendChild(rnRank);
     const rnCh = (state.gameMode === 'cpu' && r.idx !== state.humanPlayer) ? getCpuCharacter(r.idx) : null;
-    if (rnCh && CHAR_PIXELS[rnCh.id]) {
-      const rnCvs = document.createElement('canvas');
-      rnCvs.width = 32; rnCvs.height = 32;
-      rnCvs.style.cssText = 'width:16px;height:16px;image-rendering:pixelated;';
-      rnCvs.className = getCharBreatheClass(rnCh.id);
-      drawCharPixelArt(rnCvs, rnCh.id);
-      rnSpan.appendChild(rnCvs);
+    if (rnCh && CHAR_IMAGES[rnCh.id]) {
+      rnSpan.appendChild(createCharImg(rnCh.id, 16));
     }
     const rnName = document.createElement('span');
     rnName.textContent = r.player.name;
@@ -1878,7 +1409,6 @@ function renderCharSelect() {
   label.textContent = 'Pick #' + slotNum + ' (' + ordinal + ')';
   label.style.color = colors[charSelectSlot];
 
-  stopAllCharEffects();
   const grid = document.getElementById('char-grid');
   grid.innerHTML = '';
   grid.style.gridTemplateColumns = 'auto repeat(3, 1fr)';
@@ -1908,11 +1438,8 @@ function renderCharSelect() {
     var ch = CPU_CHARACTERS[i];
     const card = document.createElement('div');
     card.className = 'char-card';
-    const cvs = document.createElement('canvas');
-    cvs.width = 32; cvs.height = 32;
-    cvs.style.cssText = 'image-rendering:pixelated;width:40px;height:40px;';
-    cvs.className = getCharBreatheClass(ch.id);
-    card.appendChild(cvs);
+    var charImg = createCharImg(ch.id, 40);
+    card.appendChild(charImg);
     const info = document.createElement('div');
     info.className = 'char-info';
     info.innerHTML = '<span class="char-name">' + ch.name + '</span>' +
@@ -1927,8 +1454,6 @@ function renderCharSelect() {
       buildStatBar('DEF', ch.def) +
       buildStatBar('RANDOM', ch.rng);
     card.appendChild(tooltip);
-    drawCharPixelArt(cvs, ch.id);
-    startCharActionEffect(cvs, ch.id);
     // Long-press shows tooltip on mobile, short tap selects
     var pressTimer = null;
     var longPressed = false;
@@ -1965,7 +1490,6 @@ function pickCharacter(charIdx) {
     document.getElementById('char-start-btn').style.display = '';
     document.getElementById('char-slot-label').textContent = 'ALL SET!';
     // Show selected summary
-    stopAllCharEffects();
     const grid = document.getElementById('char-grid');
     grid.innerHTML = '';
     grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
@@ -1978,11 +1502,7 @@ function pickCharacter(charIdx) {
         if (ci === i) { pos = p + 1; break; }
         ci++;
       }
-      const cvs = document.createElement('canvas');
-      cvs.width = 32; cvs.height = 32;
-      cvs.style.cssText = 'image-rendering:pixelated;width:40px;height:40px;';
-      cvs.className = getCharBreatheClass(ch.id);
-      card.appendChild(cvs);
+      card.appendChild(createCharImg(ch.id, 40));
       const info = document.createElement('div');
       info.className = 'char-info';
       info.innerHTML = '<span class="char-name">#' + pos + ' ' + ch.name + '</span>' +
@@ -1991,8 +1511,6 @@ function pickCharacter(charIdx) {
         buildStatBar('DEF', ch.def) +
         buildStatBar('RANDOM', ch.rng);
       card.appendChild(info);
-      drawCharPixelArt(cvs, ch.id);
-      startCharActionEffect(cvs, ch.id);
       grid.appendChild(card);
     });
   } else {
@@ -2009,7 +1527,6 @@ function confirmCharSelect() {
   });
   document.getElementById('char-start-btn').disabled = true;
   setTimeout(function() {
-    stopAllCharEffects();
     document.getElementById('char-select').style.display = 'none';
     document.getElementById('char-start-btn').disabled = false;
     startGame(pendingGameMode === 'continuous' ? 'continuous' : 'cpu');
@@ -2238,12 +1755,10 @@ function buildCharGrid(stats) {
     var hasData = cs && cs.games > 0;
     var cell = document.createElement('div');
     cell.style.cssText = 'text-align:center;padding:6px 2px;border:1px solid rgba(233,69,96,0.2);border-radius:4px;' + (hasData ? '' : 'opacity:0.3;');
-    var cvs = document.createElement('canvas');
-    cvs.width = 32; cvs.height = 32;
-    cvs.style.cssText = 'width:20px;height:20px;image-rendering:pixelated;display:block;margin:0 auto 2px;';
-    cvs.className = getCharBreatheClass(ch.id);
-    drawCharPixelArt(cvs, ch.id);
-    cell.appendChild(cvs);
+    var charImg = createCharImg(ch.id, 20);
+    charImg.style.display = 'block';
+    charImg.style.margin = '0 auto 2px';
+    cell.appendChild(charImg);
     var nameEl = document.createElement('div');
     nameEl.style.cssText = 'font-size:10px;font-weight:bold;color:#eee;';
     nameEl.textContent = ch.name;

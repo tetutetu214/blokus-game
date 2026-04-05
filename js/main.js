@@ -64,12 +64,29 @@ function getCharBreatheClass(charId) {
   return 'char-anim-' + charId;
 }
 
-// Create character image element
+// Preload all character images into cache
+var charImageCache = {};
+function preloadCharImages() {
+  for (var id in CHAR_IMAGES) {
+    var img = new Image();
+    img.src = CHAR_IMAGES[id];
+    charImageCache[id] = img;
+  }
+}
+
+// Create character image element (uses preloaded cache)
 function createCharImg(charId, size) {
   var img = document.createElement('img');
-  img.src = CHAR_IMAGES[charId];
+  if (charImageCache[charId]) {
+    img.src = charImageCache[charId].src;
+  } else {
+    img.src = CHAR_IMAGES[charId];
+  }
   img.alt = charId;
+  img.width = size;
+  img.height = size;
   img.style.cssText = 'width:' + size + 'px;height:' + size + 'px;object-fit:contain;';
+  img.decoding = 'async';
   img.className = getCharBreatheClass(charId);
   return img;
 }
@@ -1305,6 +1322,7 @@ function updateContinueButton() {
 // Initialize event listeners and UI after DOM is ready
 // (script loads before stats-overlay and rules-overlay elements)
 document.addEventListener('DOMContentLoaded', function() {
+  preloadCharImages();
   setupEventListeners();
   updateContinueButton();
 });

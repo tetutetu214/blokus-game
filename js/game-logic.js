@@ -13,6 +13,7 @@ export const state = {
   lastPlacedCells: [[], [], [], []],
   humanPlayer: 0,
   gameMode: 'cpu',
+  teamMode: false, // local2p のとき true。slot % 2 でチーム分けする
 };
 
 export function initState(boardSize, gameMode, humanPlayer) {
@@ -25,6 +26,7 @@ export function initState(boardSize, gameMode, humanPlayer) {
   state.lastPlacedCells = [[], [], [], []];
   state.humanPlayer = humanPlayer;
   state.gameMode = gameMode;
+  state.teamMode = (gameMode === 'local2p'); // local2p のときチームモードを有効化
 
   const activeIdx = (boardSize === 14) ? PIECES_14 : (boardSize === 24) ? PIECES_24 : null;
   state.playerPieces = [];
@@ -47,6 +49,7 @@ export function restoreState(saveData) {
   state.lastPlacedCells = saveData.lastPlacedCells || [[], [], [], []];
   state.humanPlayer = saveData.humanPlayer !== undefined ? saveData.humanPlayer : 0;
   state.gameMode = saveData.gameMode;
+  state.teamMode = (saveData.gameMode === 'local2p'); // セーブデータから teamMode を復元
 
   const activeIdx = (state.BOARD_SIZE === 14) ? PIECES_14 : (state.BOARD_SIZE === 24) ? PIECES_24 : null;
   state.playerPieces = [];
@@ -57,6 +60,13 @@ export function restoreState(saveData) {
       state.playerPieces.push(PIECE_SHAPES.slice(0, 21).map((shape, idx) => ({ shape: shape.map(s => [...s]), used: saveData.pieceUsed[p][idx] })));
     }
   }
+}
+
+// ===== Team Mode =====
+// local2p モード: teamOf はスロット番号をチーム番号に変換する（0,2→0 / 1,3→1）
+// teamMode=false のとき恒等写像になり、4人モードの既存挙動が完全に保たれる
+export function teamOf(slot) {
+  return state.teamMode ? (slot % 2) : slot;
 }
 
 // Legacy compatibility (for setGameState during transition)
@@ -161,7 +171,8 @@ export function canPlace(player, shape, br, bc) {
     const adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
     for (const [ar, ac] of adj) {
       if (ar >= 0 && ar < bs && ac >= 0 && ac < bs) {
-        if (state.board[ar][ac] === player) return false;
+        // 辺隣接に同チームのピースがあれば配置不可（teamMode=false のとき player===player の従来挙動と等価）
+        if (state.board[ar][ac] >= 0 && teamOf(state.board[ar][ac]) === teamOf(player)) return false;
       }
     }
   }
@@ -175,7 +186,8 @@ export function canPlace(player, shape, br, bc) {
     const diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
     for (const [dr, dc] of diag) {
       if (dr >= 0 && dr < bs && dc >= 0 && dc < bs) {
-        if (state.board[dr][dc] === player) return true;
+        // 対角に同チームのピースがあれば角接続OK（teamMode=false のとき従来挙動と等価）
+        if (state.board[dr][dc] >= 0 && teamOf(state.board[dr][dc]) === teamOf(player)) return true;
       }
     }
   }
@@ -202,7 +214,8 @@ export function getCornerPositions(player) {
   const seen = new Set();
   for (let r = 0; r < bs; r++) {
     for (let c = 0; c < bs; c++) {
-      if (state.board[r][c] !== player) continue;
+      // 同チームのセルを角接続候補の起点として扱う（teamMode=false のとき player===player の従来挙動と等価）
+      if (state.board[r][c] < 0 || teamOf(state.board[r][c]) !== teamOf(player)) continue;
       const diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
       for (const [dr, dc] of diag) {
         if (dr < 0 || dr >= bs || dc < 0 || dc >= bs) continue;
@@ -213,7 +226,9 @@ export function getCornerPositions(player) {
         const adj = [[dr-1,dc],[dr+1,dc],[dr,dc-1],[dr,dc+1]];
         let blocked = false;
         for (const [ar, ac] of adj) {
-          if (ar >= 0 && ar < bs && ac >= 0 && ac < bs && state.board[ar][ac] === player) {
+          // 辺隣接に同チームのピースがあれば blocked（teamMode=false のとき従来挙動と等価）
+          if (ar >= 0 && ar < bs && ac >= 0 && ac < bs &&
+              state.board[ar][ac] >= 0 && teamOf(state.board[ar][ac]) === teamOf(player)) {
             blocked = true; break;
           }
         }

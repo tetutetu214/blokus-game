@@ -25,6 +25,14 @@ const PLAYERS_LOCAL = [
   { id: 3, name: 'P4', color: '#D55E00', light: '#e8885a' }
 ];
 
+// LOCAL 2P モード用プレイヤー定義: P1（青）が slot 0,2 / P2（橙）が slot 1,3
+const PLAYERS_LOCAL_2P = [
+  { id: 0, name: 'P1', color: '#0072B2', light: '#4da6d9' }, // チーム0 トレイA
+  { id: 1, name: 'P2', color: '#D55E00', light: '#e8885a' }, // チーム1 トレイA
+  { id: 2, name: 'P1', color: '#0072B2', light: '#4da6d9' }, // チーム0 トレイB
+  { id: 3, name: 'P2', color: '#D55E00', light: '#e8885a' }, // チーム1 トレイB
+];
+
 const PLAYERS_PUZZLE = [
   { id: 0, name: 'BLUE', color: '#0072B2', light: '#4da6d9' },
   { id: 1, name: 'YELLOW', color: '#F0E442', light: '#f5ed7a' },
@@ -894,6 +902,19 @@ function showScores() {
     totalDiv.style.cssText = 'margin-top:12px;font-size:14px;color:#aaa;';
     totalDiv.textContent = placedPieces + ' / ' + totalPieces + ' pieces placed';
     body.appendChild(totalDiv);
+  } else if (state.gameMode === 'local2p') {
+    // local2p: 2チームスコアを表示
+    const team0Score = getScore(0) + getScore(2);
+    const team1Score = getScore(1) + getScore(3);
+    const rowP1 = document.createElement('div');
+    rowP1.className = 'score-row';
+    rowP1.innerHTML = `<span style="color:#0072B2">P1</span><span>${team0Score}pts</span>`;
+    div.appendChild(rowP1);
+    const rowP2 = document.createElement('div');
+    rowP2.className = 'score-row';
+    rowP2.innerHTML = `<span style="color:#D55E00">P2</span><span>${team1Score}pts</span>`;
+    div.appendChild(rowP2);
+    body.appendChild(div);
   } else {
     // Sort players by score descending for ranking
     const ranked = players.map((p, i) => ({ player: p, idx: i, score: getScore(i) }));
@@ -999,6 +1020,34 @@ function endGame() {
 }
 
 function showSingleGameResult() {
+  // local2p: 2チーム集計で勝敗を決める
+  if (state.gameMode === 'local2p') {
+    const team0Score = getScore(0) + getScore(2);
+    const team1Score = getScore(1) + getScore(3);
+    let title2p;
+    if (team0Score > team1Score) title2p = 'P1 WINS!';
+    else if (team1Score > team0Score) title2p = 'P2 WINS!';
+    else title2p = 'DRAW';
+    document.getElementById('modal-title').textContent = title2p;
+    document.getElementById('modal-close-btn').style.display = 'none';
+    document.getElementById('restart-btn').style.display = 'inline-block';
+    const body2p = document.getElementById('modal-body');
+    body2p.innerHTML = '';
+    const div2p = document.createElement('div');
+    div2p.className = 'scores';
+    const rowP1 = document.createElement('div');
+    rowP1.className = 'score-row';
+    rowP1.innerHTML = `<span style="color:#0072B2">#${team0Score >= team1Score ? 1 : 2} P1</span><span>${team0Score}pts</span>`;
+    div2p.appendChild(rowP1);
+    const rowP2 = document.createElement('div');
+    rowP2.className = 'score-row';
+    rowP2.innerHTML = `<span style="color:#D55E00">#${team1Score > team0Score ? 1 : 2} P2</span><span>${team1Score}pts</span>`;
+    div2p.appendChild(rowP2);
+    body2p.appendChild(div2p);
+    document.getElementById('modal-overlay').classList.add('show');
+    return;
+  }
+
   let best = -999, winner = 0;
   players.forEach((p, i) => {
     const s = getScore(i);
@@ -1266,6 +1315,8 @@ function resumeGame() {
     }
   } else if (state.gameMode === 'puzzle') {
     players = PLAYERS_PUZZLE;
+  } else if (state.gameMode === 'local2p') {
+    players = PLAYERS_LOCAL_2P; // local2p 再開: humanPlayer は restoreState で復元済み
   } else {
     players = PLAYERS_LOCAL;
   }
@@ -1311,7 +1362,7 @@ function updateContinueButton() {
   if (save && !save.gameOver) {
     const date = new Date(save.timestamp);
     const timeStr = date.toLocaleString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : save.gameMode === 'puzzle' ? 'Perfect Place' : 'Local 4P';
+    const modeStr = save.gameMode === 'cpu' ? 'vs CPU' : save.gameMode === 'puzzle' ? 'Perfect Place' : save.gameMode === 'local2p' ? 'Local 2P' : 'Local 4P';
     btn.querySelector('.sub').textContent = modeStr + ' - ' + timeStr;
     btn.style.display = '';
   } else {
@@ -1633,7 +1684,7 @@ function confirmBoardSize(size) {
   } else if (pendingGameMode === 'puzzle') {
     startGame('puzzle');
   } else {
-    startGame('local');
+    startGame(pendingGameMode); // local / local2p をそのまま渡す
   }
 }
 
@@ -1643,7 +1694,7 @@ function startGame(mode) {
   deleteSave(); // Clear old save when starting new game
   // For continuous mode, use 'cpu' internally for game logic
   state.gameMode = (mode === 'continuous') ? 'cpu' : mode;
-  if (mode === 'local' || mode === 'puzzle') state.humanPlayer = -1; // No CPU
+  if (mode === 'local' || mode === 'puzzle' || mode === 'local2p') state.humanPlayer = -1; // No CPU
 
   // Build players array with human name at correct position
   if (mode === 'cpu' || mode === 'continuous') {
@@ -1667,6 +1718,8 @@ function startGame(mode) {
     }
   } else if (mode === 'puzzle') {
     players = PLAYERS_PUZZLE;
+  } else if (mode === 'local2p') {
+    players = PLAYERS_LOCAL_2P;
   } else {
     players = PLAYERS_LOCAL;
   }
@@ -2252,6 +2305,7 @@ function setupEventListeners() {
   document.getElementById('btn-battle').addEventListener('click', showBattleMenu);
   document.getElementById('btn-battle-back').addEventListener('click', hideBattleMenu);
   document.getElementById('btn-vs-cpu').addEventListener('click', function() { showBoardSizeSelect('cpu'); });
+  document.getElementById('btn-local-2p').addEventListener('click', function() { showBoardSizeSelect('local2p'); });
   document.getElementById('btn-local-4p').addEventListener('click', function() { showBoardSizeSelect('local'); });
   document.getElementById('btn-continuous').addEventListener('click', function() { showBoardSizeSelect('continuous'); });
   document.getElementById('btn-puzzle-menu').addEventListener('click', showPuzzleMenu);

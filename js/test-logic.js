@@ -500,6 +500,90 @@ async function runTests() {
     assert('コーナー全封鎖 → 有効手なし', !GL.hasValidMove(0));
   }
 
+  section('LOCAL 2P / team mode: teamOf の写像（teamMode=true）');
+  {
+    GL.setGameState({ BOARD_SIZE: 20, board: [], teamMode: true });
+    assert('teamMode=true: slot0 は team0', GL.teamOf(0) === 0);
+    assert('teamMode=true: slot1 は team1', GL.teamOf(1) === 1);
+    assert('teamMode=true: slot2 は team0（P1の2番目トレイ）', GL.teamOf(2) === 0);
+    assert('teamMode=true: slot3 は team1（P2の2番目トレイ）', GL.teamOf(3) === 1);
+  }
+
+  section('LOCAL 2P / team mode: teamOf の写像（teamMode=false）');
+  {
+    GL.setGameState({ BOARD_SIZE: 20, board: [], teamMode: false });
+    assert('teamMode=false: slot0 は 0（恒等写像）', GL.teamOf(0) === 0);
+    assert('teamMode=false: slot1 は 1（恒等写像）', GL.teamOf(1) === 1);
+    assert('teamMode=false: slot2 は 2（恒等写像）', GL.teamOf(2) === 2);
+    assert('teamMode=false: slot3 は 3（恒等写像）', GL.teamOf(3) === 3);
+  }
+
+  section('LOCAL 2P / team mode: 同チームのピース同士は辺で接触できない');
+  {
+    const s = makeState(20);
+    s.teamMode = true;
+    s.board[5][5] = 0; // slot0 のピース
+    GL.setGameState(s);
+    assert('同チーム（slot0 と slot2）は辺で接触できない', !GL.canPlace(2, [[0,0]], 5, 6));
+  }
+
+  section('LOCAL 2P / team mode: 同チームのピース同士は角で接触できる');
+  {
+    const s = makeState(20);
+    s.teamMode = true;
+    s.board[5][5] = 0;   // slot0 のピース
+    s.board[19][19] = 2; // slot2 のスタート角（first-move 脱出）
+    GL.setGameState(s);
+    assert('同チーム（slot0 と slot2）は角で接触できる', GL.canPlace(2, [[0,0]], 4, 4));
+  }
+
+  section('LOCAL 2P / team mode: 異チームのピースとは辺で接触できる');
+  {
+    const s = makeState(20);
+    s.teamMode = true;
+    s.board[0][19] = 1; // slot1 のスタート角（first-move 脱出）
+    s.board[3][3] = 1;  // slot1 の別ピース（(2,2) が角接続候補になる）
+    s.board[2][3] = 0;  // slot0（team0）のピース（(2,2)に置いた場合の辺接触位置）
+    GL.setGameState(s);
+    assert('異チーム（slot0 と slot1）は辺で接触できる', GL.canPlace(1, [[0,0]], 2, 2));
+  }
+
+  section('LOCAL 2P / 後方互換: teamMode=false では slot0 と slot2 は辺で接触できる');
+  {
+    const s = makeState(20);
+    s.teamMode = false;
+    s.board[19][19] = 2; // slot2 のピース（スタート角 first-move 脱出）
+    s.board[18][19] = 0; // slot0（別プレイヤー）のピース
+    GL.setGameState(s);
+    assert('teamMode=false: slot0 と slot2 は辺で接触できる（後方互換）', GL.canPlace(2, [[0,0]], 18, 18));
+  }
+
+  section('LOCAL 2P / team mode: 各スロットは自スロットのスタート角からスタートする');
+  {
+    const s = makeState(20);
+    s.teamMode = true;
+    s.board[0][0] = 0; // slot0 は置き済み（first-move 終了）
+    GL.setGameState(s);
+    assert('local2p で slot2 の first-move は [19,19] を覆う必要がある', GL.canPlace(2, [[0,0]], 19, 19));
+    assert('local2p で slot2 の first-move は空の非コーナー[10,10]には置けない', !GL.canPlace(2, [[0,0]], 10, 10));
+  }
+
+  section('LOCAL 2P / チームスコア集計: getScore(0)+getScore(2) が team0 スコア');
+  {
+    const s = makeState(20);
+    s.playerPieces = Array.from({ length: 4 }, () =>
+      GL.PIECE_SHAPES.slice(0, 21).map(sh => ({ shape: sh.map(c => [...c]), used: false }))
+    );
+    GL.setGameState(s);
+    assert('team0 スコア（全未配置）は getScore(0)+getScore(2)=-178', GL.getScore(0) + GL.getScore(2) === -178);
+    assert('team1 スコア（全未配置）は getScore(1)+getScore(3)=-178', GL.getScore(1) + GL.getScore(3) === -178);
+    s.playerPieces[0].forEach(p => p.used = true);
+    s.playerPieces[2].forEach(p => p.used = true);
+    GL.setGameState(s);
+    assert('team0 スコア（全使用）は 30', GL.getScore(0) + GL.getScore(2) === 30);
+    assert('team1 スコア（全未配置のまま）は -178', GL.getScore(1) + GL.getScore(3) === -178);
+  }
+
   // Results
   console.log('\n' + '='.repeat(40));
   if (fail === 0) {

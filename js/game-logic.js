@@ -14,6 +14,7 @@ var state = {
   lastPlacedCells: [[], [], [], []],
   humanPlayer: 0,
   gameMode: 'cpu',
+  teamMode: false, // local2p のとき true。slot % 2 でチーム分けする
 };
 
 function initState(boardSize, gameMode, humanPlayer) {
@@ -26,6 +27,7 @@ function initState(boardSize, gameMode, humanPlayer) {
   state.lastPlacedCells = [[], [], [], []];
   state.humanPlayer = humanPlayer;
   state.gameMode = gameMode;
+  state.teamMode = (gameMode === 'local2p'); // local2p のときチームモードを有効化
 
   const activeIdx = (boardSize === 14) ? PIECES_14 : (boardSize === 24) ? PIECES_24 : null;
   state.playerPieces = [];
@@ -89,7 +91,8 @@ function restoreState(saveData) {
     ? saveData.humanPlayer : 0;
 
   // Validate gameMode
-  state.gameMode = ['cpu', 'puzzle', 'local'].includes(saveData.gameMode) ? saveData.gameMode : 'cpu';
+  state.gameMode = ['cpu', 'puzzle', 'local', 'local2p'].includes(saveData.gameMode) ? saveData.gameMode : 'cpu';
+  state.teamMode = (state.gameMode === 'local2p'); // セーブデータから teamMode を復元
 
   // Validate pieceUsed
   if (!Array.isArray(saveData.pieceUsed) || saveData.pieceUsed.length !== 4) {
@@ -199,6 +202,12 @@ function getStartCorner(player) {
   return [[0,0],[0,m],[m,m],[m,0]][player];
 }
 
+// local2p モード: teamOf はスロット番号をチーム番号に変換する（0,2→0 / 1,3→1）
+// teamMode=false のとき恒等写像になり、4人モードの既存挙動が完全に保たれる
+function teamOf(slot) {
+  return state.teamMode ? (slot % 2) : slot;
+}
+
 function canPlace(player, shape, br, bc) {
   const bs = state.BOARD_SIZE;
   const cells = shape.map(([dr, dc]) => [br + dr, bc + dc]);
@@ -212,7 +221,8 @@ function canPlace(player, shape, br, bc) {
     const adj = [[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
     for (const [ar, ac] of adj) {
       if (ar >= 0 && ar < bs && ac >= 0 && ac < bs) {
-        if (state.board[ar][ac] === player) return false;
+        // 辺隣接に同チームのピースがあれば配置不可（teamMode=false のとき player===player と等価）
+        if (state.board[ar][ac] >= 0 && teamOf(state.board[ar][ac]) === teamOf(player)) return false;
       }
     }
   }
@@ -226,7 +236,8 @@ function canPlace(player, shape, br, bc) {
     const diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
     for (const [dr, dc] of diag) {
       if (dr >= 0 && dr < bs && dc >= 0 && dc < bs) {
-        if (state.board[dr][dc] === player) return true;
+        // 対角に同チームのピースがあれば角接続OK（teamMode=false のとき従来挙動と等価）
+        if (state.board[dr][dc] >= 0 && teamOf(state.board[dr][dc]) === teamOf(player)) return true;
       }
     }
   }
@@ -253,18 +264,20 @@ function getCornerPositions(player) {
   const seen = new Set();
   for (let r = 0; r < bs; r++) {
     for (let c = 0; c < bs; c++) {
-      if (state.board[r][c] !== player) continue;
+      // 同チームのセルを角接続候補の起点として扱う（teamMode=false のとき従来挙動と等価）
+      if (state.board[r][c] < 0 || teamOf(state.board[r][c]) !== teamOf(player)) continue;
       const diag = [[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]];
       for (const [dr, dc] of diag) {
         if (dr < 0 || dr >= bs || dc < 0 || dc >= bs) continue;
         if (state.board[dr][dc] >= 0) continue;
         const key = dr + ',' + dc;
         if (seen.has(key)) continue;
-        // Check not edge-adjacent to own pieces
+        // Check not edge-adjacent to own team pieces
         const adj = [[dr-1,dc],[dr+1,dc],[dr,dc-1],[dr,dc+1]];
         let blocked = false;
         for (const [ar, ac] of adj) {
-          if (ar >= 0 && ar < bs && ac >= 0 && ac < bs && state.board[ar][ac] === player) {
+          if (ar >= 0 && ar < bs && ac >= 0 && ac < bs &&
+              state.board[ar][ac] >= 0 && teamOf(state.board[ar][ac]) === teamOf(player)) {
             blocked = true; break;
           }
         }
@@ -412,7 +425,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     PIECE_SHAPES, PIECES_14, PIECES_24,
     rotateCW, flipH, normalize, getAllOrientations,
-    isFirstMove, getStartCorner, canPlace, placePiece,
+    isFirstMove, getStartCorner, teamOf, canPlace, placePiece,
     getScore, hasValidMove, cpuMove, setGameState,
     initState, restoreState, state,
     getCornerPositions, countNewCorners, countBlockedOpponentCorners, getCenterDistance,
